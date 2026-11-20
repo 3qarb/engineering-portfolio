@@ -16,7 +16,7 @@ export function Hero() {
   const p = useProfile();
   const lp = useLocalePath();
   const [gl] = useState(hasWebGL);
-  const d = 0.1;
+  const d = 0.05;
   const words = p.name.split(' ');
   const nameLines = [words.slice(0, 2).join(' '), words.slice(2).join(' ')].filter(Boolean);
 
@@ -52,7 +52,7 @@ export function Hero() {
         <motion.ul
           className="mt-5 flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:gap-x-5 sm:gap-y-2"
           initial={{ opacity: 0 }}
-          animate={{ opacity: 1, transition: { delay: d + 0.3, duration: 0.8 } }}
+          animate={{ opacity: 1, transition: { delay: d + 0.2, duration: 0.6 } }}
           aria-label={p.title}
         >
           {p.titles.map((x, i) => (
@@ -66,8 +66,8 @@ export function Hero() {
         <div className="mt-8 grid items-end gap-8 lg:grid-cols-[minmax(0,1fr)_auto]">
           <motion.p
             className="max-w-[52ch] text-[16px] leading-relaxed text-bone-dim sm:text-[18px]"
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0, transition: { delay: d + 0.4, duration: 0.8, ease } }}
+            initial={{ y: 12 }}
+            animate={{ y: 0, transition: { delay: d + 0.2, duration: 0.7, ease } }}
           >
             {p.positioning}
           </motion.p>

@@ -11,7 +11,7 @@ import { useExperience, useExpertise, useLang, useProfile, useSoftware, useT } f
  * /cv shows it with download and print; /cv/print is the bare sheet that
  * scripts/build-cv.sh turns into public/cv.pdf (and /ar/cv/print into public/cv-ar.pdf).
  */
-function Sheet() {
+function Sheet({ standalone = false }: { standalone?: boolean }) {
   const t = useT();
   const p = useProfile();
   const jobs = useExperience();
@@ -19,13 +19,14 @@ function Sheet() {
   const software = useSoftware();
   const email = isPlaceholder(profile.email) ? '' : profile.email;
   const phone = isPlaceholder(profile.phone) ? '' : profile.phone;
+  const Name = standalone ? 'h1' : 'p';
   const linkedin = profile.links.linkedin.verified ? profile.links.linkedin.url.replace(/^https?:\/\/(www\.)?/, '') : '';
 
   return (
     <article className="cv-sheet mx-auto bg-[#fbfaf7] text-[#16150f]" aria-label={t.cv.label}>
       <header className="flex items-end justify-between gap-8 border-b-2 border-[#16150f] pb-6">
         <div>
-          <h1 className="text-[30px] font-semibold leading-none tracking-[-0.03em]">{p.name}</h1>
+          <Name className="text-[30px] font-semibold leading-none tracking-[-0.03em]">{p.name}</Name>
           <p className="mt-3 text-[12.5px] text-[#5b564c]">{p.titles.join('  ·  ')}</p>
         </div>
         <svg viewBox="0 0 32 32" className="h-10 w-10 shrink-0" aria-hidden="true">
@@ -126,7 +127,7 @@ export function CvPage({ print = false }: { print?: boolean }) {
     return () => document.body.classList.remove('cv-print');
   }, [print]);
 
-  if (print) return <Sheet />;
+  if (print) return <Sheet standalone />;
 
   return (
     <>

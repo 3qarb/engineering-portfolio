@@ -7,6 +7,9 @@ import { Footer } from './Footer';
 import { useProjectsStore } from '../../store/projectsStore';
 import { basePath, useT } from '../../i18n';
 
+/** The first page paints at once (good for LCP); later route changes fade in. */
+let firstPage = true;
+
 export function MainLayout() {
   const { pathname } = useLocation();
   const t = useT();
@@ -17,6 +20,7 @@ export function MainLayout() {
 
   useEffect(() => {
     void loadPublished();
+    firstPage = false;
   }, [loadPublished]);
 
   useEffect(() => {
@@ -34,7 +38,7 @@ export function MainLayout() {
         key={page}
         tabIndex={-1}
         className="flex-1 outline-none"
-        initial={{ opacity: 0 }}
+        initial={firstPage ? false : { opacity: 0 }}
         animate={{ opacity: 1, transition: { duration: 0.4 } }}
       >
         <Outlet />

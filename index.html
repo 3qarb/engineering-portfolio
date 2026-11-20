@@ -6,6 +6,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="color-scheme" content="dark" />
     <meta name="theme-color" content="#09090a" />
+    <!-- set language and direction before the first paint, so Arabic pages do not flip after load -->
+    <script>
+      (function () {
+        var p = location.pathname;
+        var ar = p === '/ar' || p.indexOf('/ar/') === 0;
+        document.documentElement.lang = ar ? 'ar' : 'en';
+        document.documentElement.dir = ar ? 'rtl' : 'ltr';
+      })();
+    </script>
 
     <!-- static defaults for link previews that do not run JavaScript; <Seo> replaces them per page -->
     <title data-static-seo>Abdulaziz Kanaan — Civil, Technical Office &amp; Structural Engineer, Jeddah</title>

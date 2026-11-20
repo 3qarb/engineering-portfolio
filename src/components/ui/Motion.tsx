@@ -25,7 +25,7 @@ export function LineReveal({
           <motion.span
             className="block"
             initial={{ y: '105%' }}
-            animate={{ y: '0%', transition: { duration: 1, delay: delay + i * 0.09, ease } }}
+            animate={{ y: '0%', transition: { duration: 0.8, delay: delay + i * 0.08, ease } }}
           >
             {line}
           </motion.span>

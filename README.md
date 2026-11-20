@@ -1,363 +1,86 @@
-# Abdulaziz Ahmed Kanaan — Civil & Structural Engineer Portfolio
+# Abdulaziz Ahmed Kanaan — Engineering Portfolio
 
-A premium, production-quality personal portfolio website for a Civil and Structural Engineer specializing in technical office engineering, structural analysis, and heritage restoration.
+Portfolio of a civil, technical office and structural engineer in Jeddah. English and Arabic,
+with an interactive 3D structural explorer (members, reinforcement, cross-sections, quantity
+schedules, 4D construction sequence).
 
-## 🌟 Features
+Current state, open content questions and next steps: **[docs/PROJECT_PROGRESS.md](docs/PROJECT_PROGRESS.md)**.
+Design and implementation standard: **[.claude/skills/engineering-portfolio-design/SKILL.md](.claude/skills/engineering-portfolio-design/SKILL.md)**.
 
-- **Premium Design**: Swiss minimalist aesthetic with editorial typography, architectural grey color palette, and muted bronze accents
-- **3D Hero Visualization**: Interactive Three.js structural frame animation with auto-rotation and orbit controls
-- **Responsive Layout**: Mobile-first, fully responsive across 320px - 1440px+
-- **Accessible**: WCAG 2.1 AA compliant with proper ARIA labels, skip links, focus management, and reduced-motion support
-- **Performance Optimized**: Code-split chunks, lazy-loaded images, optimized Three.js rendering
-- **Smooth Animations**: Framer Motion powered transitions with reduced-motion support
-- **SEO Ready**: Semantic HTML, Open Graph tags, structured metadata
+## Stack
 
-## 🛠 Tech Stack
+React 19 · TypeScript · Vite 8 · Tailwind CSS 3 · React Router 7 · Zustand 5 · Motion ·
+Three.js 0.187 + React Three Fiber 9 + Drei 10 + postprocessing · Lucide icons ·
+oxlint · Vitest 5 · playwright-cli (browser checks, PDF and image generation).
 
-| Category | Technology |
-|----------|------------|
-| Framework | React 19 + TypeScript |
-| Build Tool | Vite 6 |
-| Styling | Tailwind CSS 3.4 |
-| Animation | Framer Motion 11 |
-| 3D Graphics | Three.js + OrbitControls |
-| Icons | Lucide React + Custom Brand Icons |
-| Routing | React Router DOM 7 |
-| Dev Tools | ESLint, TypeScript, Vite |
-
-## 📁 Project Structure
-
-```
-portfolio/
-├── public/
-│   ├── images/              # Project images & placeholders
-│   ├── cv.pdf               # Downloadable CV
-│   └── favicon.svg
-├── src/
-│   ├── components/
-│   │   ├── ui/              # Base UI components (Button, Card, Input, BrandIcons)
-│   │   ├── layout/          # Header, Footer, MainLayout
-│   │   ├── hero/            # Hero section with 3D visualization
-│   │   ├── about/           # About preview & full page
-│   │   ├── experience/      # Experience timeline
-│   │   ├── projects/        # Project cards & case study pages
-│   │   ├── skills/          # Skills visualization
-│   │   ├── gallery/         # Engineering gallery with lightbox
-│   │   └── contact/         # Contact form & info
-│   ├── pages/               # Route pages (Index, About, Experience, Projects, ProjectDetail, Skills, Gallery, Contact, NotFound)
-│   ├── data/                # Structured content (profile, experience, projects, skills, gallery)
-│   ├── hooks/               # Custom hooks (useReducedMotion, useScrollReveal, useViewTransition)
-│   ├── utils/               # Utilities (cn, animations, formatting, images, motion)
-│   ├── styles/              # Global styles (index.css with design tokens)
-│   ├── App.tsx              # App router setup
-│   ├── main.tsx             # Entry point
-│   └── vite-env.d.ts
-├── .claude/launch.json      # Dev server config for Claude Browser
-├── index.html               # HTML template with SEO meta
-├── package.json
-├── tsconfig.json
-├── tsconfig.app.json
-├── tsconfig.node.json
-├── vite.config.ts           # Vite config with chunk splitting
-├── tailwind.config.js       # Tailwind config with design tokens
-├── postcss.config.js
-└── README.md
-```
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-- Node.js 20+
-- npm 10+
-
-### Installation
+## Run it
 
 ```bash
-cd portfolio
 npm install
+npm run dev            # http://localhost:3000
+npm run dev -- --host  # also reachable from a phone on the same Wi-Fi (http://<your-PC-IP>:3000)
 ```
 
-### Development
+| Command | What it does |
+|---|---|
+| `npm run check` | type-check, lint, unit tests, production build, sitemap — run before every commit |
+| `npm test` | unit tests only (`tests/`) |
+| `npm run build` | production build into `dist/` (+ sitemap when `VITE_SITE_URL` is set) |
+| `npm run preview` | serve the production build |
+| `npm run build:cv` | regenerate `public/cv.pdf` and `public/cv-ar.pdf` from the CV page (dev server running) |
+| `npm run capture:renders` | re-render the project images in `public/renders/` from the 3D models |
+| `bash scripts/capture-meta.sh` | regenerate `public/og.jpg` (link preview) and `public/apple-touch-icon.png` |
 
-```bash
-npm run dev
-```
+The three capture scripts need `playwright-cli` (`npm install -g @playwright/cli@latest`).
 
-Open http://localhost:3000 in your browser.
+## Environment variables (optional)
 
-### Production Build
+Create `.env` (never commit it) or set them in the hosting dashboard:
 
-```bash
-npm run build
-```
+| Variable | Effect |
+|---|---|
+| `VITE_SITE_URL` | public address, e.g. `https://your-domain.com` — enables canonical and `hreflang` links, `og:url` and `dist/sitemap.xml` |
+| `VITE_CONTACT_ENDPOINT` | a form service URL that accepts JSON POSTs (e.g. Formspree). Without it the form opens the visitor's email app; if `profile.email` is still a placeholder the form says contact is not configured |
 
-Output: `dist/` directory ready for deployment.
+## Content
 
-### Preview Production Build
+Everything shown comes from typed data files — edit these, not the components:
 
-```bash
-npm run preview
-```
+| File | Holds |
+|---|---|
+| `src/data/profile.ts` | name, titles, positioning, contact, about text, `pending` content list |
+| `src/data/experience.ts` | roles, newest first (template for adding one is in the file) |
+| `src/data/skills.ts` | areas of expertise and software (no levels or percentages) |
+| `src/data/projects.ts` | case studies (`kind: 'project'`) and illustrative studies (`kind: 'study'`) |
+| `src/data/buildings.ts` | the 3D models; sizes are illustrative unless `basis: 'project'` |
+| `src/i18n/strings.ts`, `strings-ar.ts` | interface text, English and Arabic |
+| `src/i18n/content-ar.ts` | Arabic versions of the content above |
 
-## 🌐 Deployment
+A value containing `example.` (e.g. the email) is treated as a placeholder and hidden.
+After changing profile or experience, run `npm run build:cv` so the PDFs match.
 
-### Static Hosting (Vercel, Netlify, Cloudflare Pages, GitHub Pages)
+**Projects added in the site** (`/projects/new`) are stored in the visitor's browser only. To publish
+them, press **Export** on the Projects page and save the file as `public/data/projects.json`, then deploy.
 
-The `dist/` folder contains a complete static site. Deploy it to any static hosting platform:
+## Languages
 
-**Vercel:**
-```bash
-npx vercel --prod
-```
+English lives at `/…`, Arabic at `/ar/…` (right-to-left, IBM Plex Sans Arabic). The 3D explorer's
+engineering tools and the project editor stay in English inside Arabic pages.
 
-**Netlify:**
-```bash
-npx netlify deploy --prod --dir=dist
-```
+## Deploy
 
-**GitHub Pages:**
-```bash
-npm run build
-npx gh-pages -d dist
-```
+Any static host works (Netlify, Vercel, Cloudflare Pages). Build command `npm run build`,
+output folder `dist`, and an SPA fallback so deep links load `index.html`:
 
-### Docker
+- Netlify: `public/_redirects` with `/*  /index.html  200`
+- Vercel: `vercel.json` with `{ "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }] }`
 
-```dockerfile
-FROM node:20-alpine AS builder
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci
-COPY . .
-RUN npm run build
+Set `VITE_SITE_URL` (and `VITE_CONTACT_ENDPOINT` if used) in the host's environment settings.
 
-FROM nginx:alpine
-COPY --from=builder /app/dist /usr/share/nginx/html
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
-```
+## Tests
 
-## 📝 Content Management
-
-All portfolio content is stored in structured TypeScript files in `src/data/`. Update these files to modify content without touching components:
-
-### Profile (`src/data/profile.ts`)
-```typescript
-export const profile = {
-  name: 'Abdulaziz Ahmed Kanaan',
-  title: 'Civil Engineer | Technical Office Engineer | Structural Engineer',
-  headline: 'Engineering Precision. Structural Integrity. Heritage Preservation.',
-  introduction: '...',
-  location: 'Jeddah, Saudi Arabia',
-  email: 'your@email.com',
-  phone: '+966 50 000 0000',
-  linkedin: 'https://linkedin.com/in/yourprofile',
-  github: 'https://github.com/yourprofile',
-  cvUrl: '/cv.pdf',
-  currentCompany: { ... },
-  about: { ... }
-};
-```
-
-### Experience (`src/data/experience.ts`)
-```typescript
-export const experience: ExperienceEntry[] = [
-  {
-    id: 'unique-id',
-    company: 'Company Name',
-    position: 'Your Position',
-    location: 'City, Country',
-    startDate: '2022',
-    endDate: 'Present', // or '2024'
-    current: true,
-    project: 'Project Name',
-    client: 'Client Name',
-    responsibilities: [
-      'Responsibility 1',
-      'Responsibility 2',
-    ],
-    technologies: ['AutoCAD', 'ETABS', 'SAP2000'],
-  },
-  // Add more entries...
-];
-```
-
-### Projects (`src/data/projects.ts`)
-```typescript
-export const projects: ProjectEntry[] = [
-  {
-    id: 'unique-id',
-    slug: 'project-slug',
-    title: 'Full Project Title',
-    shortTitle: 'Short Title',
-    category: 'Category Name',
-    location: 'City, Country',
-    client: 'Client Name',
-    period: '2022 – Present',
-    status: 'in-progress',
-    thumbnail: '/images/projects/your-project/thumbnail.jpg',
-    images: [
-      '/images/projects/your-project/01.jpg',
-      '/images/projects/your-project/02.jpg',
-    ],
-    overview: 'Project overview...',
-    engineeringContext: 'Technical context...',
-    responsibilities: ['...'],
-    challenges: ['...'],
-    structuralAssessment: '...',
-    methodology: '...',
-    solutions: ['...'],
-    software: ['AutoCAD', 'ETABS'],
-    drawings: ['Drawing 1', 'Drawing 2'],
-    featured: true,
-  },
-];
-```
-
-### Skills (`src/data/skills.ts`)
-```typescript
-export const skillCategories: SkillCategory[] = [
-  {
-    id: 'category-id',
-    title: 'Category Title',
-    icon: 'IconName', // Monitor, Building, FileText
-    skills: [
-      { name: 'Skill Name', level: 'expert', description: '...' },
-      // Levels: 'expert', 'advanced', 'proficient', 'familiar'
-    ],
-  },
-];
-```
-
-### Gallery (`src/data/gallery.ts`)
-```typescript
-export const galleryItems: GalleryItemEntry[] = [
-  {
-    id: 'unique-id',
-    category: 'Category Name',
-    projectId: 'project-id',
-    title: 'Image Title',
-    description: 'Description...',
-    image: '/images/gallery/category/image.jpg',
-    thumbnail: '/images/gallery/category/image-thumb.jpg',
-    tags: ['tag1', 'tag2'],
-  },
-];
-```
-
-### Adding Images
-1. Place images in `public/images/` following the folder structure
-2. Use descriptive filenames (kebab-case)
-3. Provide both full-size and thumbnail versions
-3. Update the corresponding data file with correct paths
-
-### Updating CV
-Replace `public/cv.pdf` with your new CV file. The download link in Hero and Header will automatically serve the new file.
-
-### Connecting Contact Form
-
-The contact form currently simulates submission. To connect a real backend:
-
-1. **Formspree / Netlify Forms / EmailJS:**
-   Update `ContactPreview.tsx` and `Contact.tsx` to submit to your endpoint:
-   ```typescript
-   const response = await fetch('https://your-endpoint.com', {
-     method: 'POST',
-     headers: { 'Content-Type': 'application/json' },
-     body: JSON.stringify(formData),
-   });
-   ```
-
-2. **Custom API Route (Vercel/Netlify Functions):**
-   Create `api/contact.ts` and update the form to POST to `/api/contact`.
-
-3. **Supabase / Firebase:**
-   Use their SDK to insert form data directly.
-
-## 🎨 Design Tokens
-
-Design tokens are defined in `src/index.css` as CSS variables and mirrored in `tailwind.config.js`:
-
-### Colors
-```css
---color-midnight-navy: #0a1628;
---color-charcoal: #1a1f2e;
---color-warm-off-white: #faf8f5;
---color-architectural-grey: #6b7280;
---color-muted-bronze: #b8860b;
---color-champagne-gold: #d4a574;
-```
-
-### Typography
-```css
---font-sans: 'Inter', system-ui, sans-serif;
---font-heading: 'Space Grotesk', system-ui, sans-serif;
---font-mono: 'JetBrains Mono', ui-monospace, monospace;
-```
-
-### Motion
-```css
---ease-out: cubic-bezier(0.23, 1, 0.32, 1);
---ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
---duration-fast: 100ms;
---duration-normal: 200ms;
---duration-slow: 300ms;
---duration-slower: 500ms;
-```
-
-## ♿ Accessibility
-
-- Semantic HTML5 elements (`<header>`, `<main>`, `<section>`, `<article>`, `<footer>`)
-- Skip to main content link
-- Proper heading hierarchy (h1 → h2 → h3)
-- ARIA labels on icon-only buttons
-- Focus-visible styles on all interactive elements
-- Color contrast ratios ≥ 4.5:1
-- Reduced motion support via `prefers-reduced-motion`
-- Keyboard navigable (Tab, Enter, Space, Escape)
-
-## 📱 Responsive Breakpoints
-
-| Breakpoint | Width | Usage |
-|------------|-------|-------|
-| Mobile | 320px - 639px | Single column, stacked layout |
-| Tablet | 640px - 1023px | 2-column grids |
-| Desktop | 1024px - 1439px | 3-4 column grids |
-| Large Desktop | 1440px+ | Full layout with max-width container |
-
-## 🧪 Quality Assurance
-
-### Build Checks
-```bash
-npm run build        # TypeScript compilation + Vite build
-```
-
-### Linting
-```bash
-npx eslint src/
-```
-
-### Browser Testing
-The project includes Playwright configuration. Run visual regression tests:
-```bash
-npx playwright test
-```
-
-### Performance
-- **Lighthouse Target**: ≥ 90 Performance, ≥ 90 Accessibility, ≥ 90 Best Practices, ≥ 90 SEO
-- **Bundle Analysis**: `npm run build` outputs chunk sizes
-- **Core Web Vitals**: Optimized for LCP, FID, CLS
-
-## 📄 License
-
-MIT License — feel free to use this as a template for your own portfolio.
-
-## 🙏 Acknowledgments
-
-- Design inspired by leading architectural firms and engineering consultancies
-- Three.js for 3D graphics
-- Framer Motion for animations
-- Tailwind CSS for utility-first styling
-- Lucide React for icons
-- Inter, Space Grotesk, and JetBrains Mono fonts via Google Fonts
+`tests/` covers the structural maths (bar areas, steel ratios, effective depth, quantities),
+schedules and sequencing for every model, rebar cages, English/Arabic key parity and content
+guards (the IKK role dates from 2025, no template placeholders, studies marked illustrative).
+Browser checks (routes, breakpoints 320–1920, explorer, forms, project add/edit/delete) were run
+with playwright-cli and the in-app browser; see `docs/PROJECT_PROGRESS.md`.

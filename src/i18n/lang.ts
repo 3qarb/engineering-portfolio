@@ -21,9 +21,9 @@ export function useLocalePath() {
   return useCallback((path: string) => withLang(path, lang), [lang]);
 }
 
-/** The same page in the other language. */
+/** The same page in the other language. Filters in the query hold language-specific values, so they are dropped. */
 export function useAlternatePath() {
-  const { pathname, search, hash } = useLocation();
+  const { pathname } = useLocation();
   const lang = langOf(pathname);
-  return withLang(basePath(pathname), lang === 'ar' ? 'en' : 'ar') + search + hash;
+  return withLang(basePath(pathname), lang === 'ar' ? 'en' : 'ar');
 }

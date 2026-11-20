@@ -19,7 +19,7 @@ function matches(p: AnyProject, q: string) {
     .every((w) => hay.includes(w));
 }
 
-function Card({ p, i }: { p: AnyProject; i: number }) {
+function Card({ p, i, wide = false }: { p: AnyProject; i: number; wide?: boolean }) {
   const t = useT();
   const lp = useLocalePath();
   const buildings = useAllBuildings();
@@ -27,12 +27,17 @@ function Card({ p, i }: { p: AnyProject; i: number }) {
   const study = p.kind === 'study';
   return (
     <motion.li
+      className={wide ? 'md:col-span-2' : undefined}
       layout
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0, transition: { delay: 0.04 * i, duration: 0.5, ease: [0.22, 1, 0.36, 1] } }}
     >
       <Link to={lp(`/projects/${p.slug}`)} className="group block">
-        <div className="relative aspect-[4/3] overflow-hidden border border-white/10 bg-ink-900 transition-[border-color,transform] duration-500 group-hover:-translate-y-0.5 group-hover:border-sand/60">
+        <div
+          className={`relative overflow-hidden border border-white/10 bg-ink-900 transition-[border-color,transform] duration-500 group-hover:-translate-y-0.5 group-hover:border-sand/60 ${
+            wide ? 'aspect-[4/3] md:aspect-[16/9]' : 'aspect-[4/3]'
+          }`}
+        >
           {p.cover || p.render || spec ? (
             <div className="absolute inset-0 transition-transform duration-700 ease-out group-hover:scale-[1.03]">
               <ProjectImage project={p} spec={spec} />
@@ -48,15 +53,13 @@ function Card({ p, i }: { p: AnyProject; i: number }) {
             <span className="label absolute end-5 top-5 border border-white/20 bg-ink-950/80 px-2.5 py-1.5 text-bone-dim">{t.common.illustrative}</span>
           )}
         </div>
-        <div className="mt-5 flex items-start justify-between gap-6">
-          <div className="min-w-0">
-            <h3 className="display text-[clamp(26px,2.8vw,40px)] transition-colors duration-300 group-hover:text-sand">{p.shortTitle}</h3>
-            {p.summary && <p className="mt-2 max-w-[46ch] text-[14px] leading-snug text-bone-mute">{p.summary}</p>}
-          </div>
-          <div className="shrink-0 text-end">
-            <p className="label">{p.category}</p>
-            {p.period && <p className="label mt-2">{p.period}</p>}
-          </div>
+        <div className="mt-5">
+          <p className="label flex flex-wrap gap-x-4 gap-y-1">
+            <span>{p.category}</span>
+            {p.period && <span className="text-bone-faint">{p.period}</span>}
+          </p>
+          <h3 className="display mt-3 text-[clamp(26px,2.8vw,40px)] transition-colors duration-300 group-hover:text-sand">{p.shortTitle}</h3>
+          {p.summary && <p className="mt-2 max-w-[52ch] text-[14px] leading-snug text-bone-mute">{p.summary}</p>}
         </div>
       </Link>
     </motion.li>
@@ -181,7 +184,7 @@ export function Projects() {
             </h2>
             <ul className="grid gap-x-6 gap-y-14 md:grid-cols-2">
               {real.map((p, i) => (
-                <Card key={p.slug} p={p} i={i} />
+                <Card key={p.slug} p={p} i={i} wide={i === 0 && real.length % 2 === 1} />
               ))}
             </ul>
           </>

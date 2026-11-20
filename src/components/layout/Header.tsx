@@ -48,7 +48,7 @@ function MenuOverlay() {
       {open && (
         <motion.div
           id="site-menu"
-          className="fixed inset-0 z-[95] flex flex-col overflow-y-auto bg-ink-950 pt-[var(--header-h)] md:hidden"
+          className="fixed inset-0 z-[95] flex flex-col overflow-y-auto bg-ink-950 pt-[var(--header-h)] lg:hidden"
           initial={{ clipPath: 'inset(0 0 100% 0)' }}
           animate={{ clipPath: 'inset(0 0 0% 0)', transition: { duration: 0.5, ease } }}
           exit={{ clipPath: 'inset(0 0 100% 0)', transition: { duration: 0.35, ease } }}
@@ -124,7 +124,7 @@ export function Header() {
               <span className="label mt-1 text-[10px]">{p.titles[1]}</span>
             </span>
           </Link>
-          <nav className="hidden items-center gap-7 lg:gap-9 md:flex" aria-label="Main">
+          <nav className="hidden items-center gap-7 lg:flex xl:gap-9" aria-label="Main">
             {NAV.filter((n) => n.key !== 'cv').map((n) => (
               <NavLink
                 key={n.to}
@@ -137,7 +137,7 @@ export function Header() {
               </NavLink>
             ))}
           </nav>
-          <div className="hidden items-center gap-6 md:flex">
+          <div className="hidden items-center gap-6 lg:flex">
             <LangSwitch />
             {!isPlaceholder(profile.cvUrl) && (
               <a href={profile.cvUrl} download className="btn-solid min-h-[44px]" aria-label={t.common.downloadCv}>
@@ -147,7 +147,7 @@ export function Header() {
           </div>
           <button
             type="button"
-            className="label flex min-h-[44px] items-center gap-3 text-bone md:hidden"
+            className="label flex min-h-[44px] items-center gap-3 text-bone lg:hidden"
             aria-expanded={open}
             aria-controls="site-menu"
             onClick={() => setOpen(!open)}
