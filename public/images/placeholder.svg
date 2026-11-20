@@ -1,0 +1,13 @@
+<svg width="800" height="600" viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="600" fill="#e8e4dd"/>
+  <g opacity="0.3">
+    <rect x="200" y="150" width="400" height="300" stroke="#b8860b" stroke-width="2" fill="none" rx="8"/>
+    <line x1="250" y1="250" x2="550" y2="250" stroke="#b8860b" stroke-width="1.5"/>
+    <line x1="250" y1="300" x2="550" y2="300" stroke="#b8860b" stroke-width="1.5"/>
+    <line x1="250" y1="350" x2="550" y2="350" stroke="#b8860b" stroke-width="1.5"/>
+    <circle cx="300" cy="250" r="8" fill="#b8860b"/>
+    <circle cx="500" cy="350" r="8" fill="#b8860b"/>
+    <circle cx="400" cy="300" r="8" fill="#b8860b"/>
+  </g>
+  <text x="400" y="480" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#6b7280">Project Visualization Placeholder</text>
+</svg>
