@@ -3,6 +3,7 @@ import { Environment, Grid, Lightformer } from '@react-three/drei';
 import { EffectComposer, N8AO, SMAA, ToneMapping, Vignette } from '@react-three/postprocessing';
 import { ToneMappingMode } from 'postprocessing';
 import * as THREE from 'three';
+import { QUALITY, useQuality } from '../../lib/device';
 
 /**
  * Lighting rig for every 3D view.
@@ -28,6 +29,7 @@ export function Stage({
   background?: string;
 }) {
   const target = useMemo(() => new THREE.Object3D(), []);
+  const q = QUALITY[useQuality((st) => st.quality)];
   const t = THREE.MathUtils.clamp((sunHour - 6) / 12, 0, 1);
   const elev = THREE.MathUtils.degToRad(14 + 58 * Math.sin(Math.PI * t));
   const az = Math.PI * (0.08 + 0.84 * t); // east (+x) through south (+z) to west (−x)
@@ -58,8 +60,8 @@ export function Stage({
         target={target}
         color={new THREE.Color('#fff1dd').lerp(new THREE.Color('#ffd2a1'), 1 - warm)}
         intensity={realistic ? 3.1 : 1.2}
-        castShadow={realistic}
-        shadow-mapSize={[2048, 2048]}
+        castShadow={realistic && q.shadows}
+        shadow-mapSize={[q.shadowMap, q.shadowMap]}
         shadow-bias={-0.0004}
         shadow-normalBias={0.03}
         shadow-camera-left={-half}
@@ -89,9 +91,15 @@ export function Stage({
           infiniteGrid
         />
       )}
-      {ao ? (
+      {q.post && ao && q.ao ? (
         <EffectComposer multisampling={0}>
           <N8AO halfRes aoRadius={1.6} distanceFalloff={0.6} intensity={realistic ? 2.6 : 1.4} quality="medium" />
+          <SMAA />
+          <ToneMapping mode={ToneMappingMode.AGX} />
+          <Vignette offset={0.4} darkness={0.32} />
+        </EffectComposer>
+      ) : q.post ? (
+        <EffectComposer multisampling={0}>
           <SMAA />
           <ToneMapping mode={ToneMappingMode.AGX} />
           <Vignette offset={0.4} darkness={0.32} />

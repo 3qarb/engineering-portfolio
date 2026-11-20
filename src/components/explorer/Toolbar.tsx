@@ -5,6 +5,7 @@ import { activeTask, planSequence } from '../../lib/structure/sequence';
 import type { BuildingSpec } from '../../lib/structure/types';
 import { useExplorer, type VisualStyle } from '../../store/explorerStore';
 import { captureView } from '../three/bridge';
+import { useQuality, type Quality } from '../../lib/device';
 import { cn } from '../../utils/cn';
 
 const STYLES: { id: VisualStyle; label: string }[] = [
@@ -14,7 +15,7 @@ const STYLES: { id: VisualStyle; label: string }[] = [
 ];
 
 const btn =
-  'inline-flex h-9 items-center gap-2 rounded-lg px-3 font-mono text-[10.5px] uppercase tracking-[0.1em] transition-colors';
+  'inline-flex h-9 items-center gap-2 rounded-sm px-3 [@media(pointer:coarse)]:h-11 font-mono text-[10.5px] uppercase tracking-[0.1em] transition-colors';
 const idle = 'text-bone-dim hover:bg-white/[0.06] hover:text-bone';
 const on = 'bg-bone text-ink-950';
 
@@ -43,6 +44,8 @@ export function Toolbar({ spec }: { spec?: BuildingSpec }) {
   const buildDay = useExplorer((s) => s.buildDay);
   const setBuildDay = useExplorer((s) => s.setBuildDay);
   const playing = useExplorer((s) => s.playing);
+  const quality = useQuality((s) => s.quality);
+  const setQuality = useQuality((s) => s.set);
   const setPlaying = useExplorer((s) => s.setPlaying);
 
   const plan = useMemo(() => (spec ? planSequence(spec, elementsFor(spec)) : null), [spec]);
@@ -68,7 +71,7 @@ export function Toolbar({ spec }: { spec?: BuildingSpec }) {
       </button>
       <div
         className={cn(
-          'no-scrollbar max-w-full flex-wrap items-stretch gap-y-3 overflow-x-auto rounded-xl border border-white/10 bg-ink-900/85 py-2.5 backdrop-blur-md xl:flex',
+          'no-scrollbar max-w-full flex-wrap items-stretch gap-y-3 overflow-x-auto rounded-sm border border-white/10 bg-ink-900/85 py-2.5 backdrop-blur-md xl:flex',
           open ? 'flex' : 'hidden',
         )}
         role="toolbar"
@@ -158,6 +161,19 @@ export function Toolbar({ spec }: { spec?: BuildingSpec }) {
           </>
         )}
 
+        <Group title="Quality">
+          <select
+            value={quality}
+            onChange={(e) => setQuality(e.target.value as Quality)}
+            className={cn(btn, idle, 'bg-transparent pr-2')}
+            aria-label="Render quality"
+          >
+            <option value="high">High</option>
+            <option value="balanced">Balanced</option>
+            <option value="low">Low</option>
+          </select>
+        </Group>
+
         <Group title="Export">
           <button type="button" onClick={() => captureView(`${spec?.id ?? 'site'}-view.png`)} className={cn(btn, idle)}>
             <Camera className="h-3.5 w-3.5" /> PNG
@@ -166,7 +182,7 @@ export function Toolbar({ spec }: { spec?: BuildingSpec }) {
       </div>
 
       {task && (
-        <p className="mt-2 inline-flex items-center gap-2 rounded-lg border border-sand/40 bg-ink-950/80 px-3 py-2 font-mono text-[11px] text-bone backdrop-blur-md">
+        <p className="mt-2 inline-flex items-center gap-2 rounded-sm border border-sand/40 bg-ink-950/80 px-3 py-2 font-mono text-[11px] text-bone backdrop-blur-md">
           <span className="text-sand">Day {Math.floor(buildDay ?? 0)}</span> {task.name}
         </p>
       )}

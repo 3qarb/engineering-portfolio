@@ -104,6 +104,11 @@ export interface BuildingSpec {
   /** Placement on the explorer site */
   site: { x: number; z: number };
   rc?: RcFrameSections;
+  /**
+   * Where the member sizes come from. 'illustrative' (the default) = typical values chosen to show
+   * the system; 'project' = taken from issued project drawings, supplied by the owner.
+   */
+  basis?: 'illustrative' | 'project';
 }
 
 export const KIND_LABEL: Record<ElementKind, string> = {

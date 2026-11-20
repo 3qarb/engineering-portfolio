@@ -10,7 +10,7 @@
   --ink-2: #0f0f10;
   --bone: #ece7df;
   --bone-dim: #b9b3aa;
-  --mute: #8a857d;
+  --mute: #958f86;
   --sand: #c9a46c;
   --line: rgba(236, 231, 223, 0.1);
   --line-strong: rgba(236, 231, 223, 0.22);
@@ -101,7 +101,7 @@
 
   /* Buttons */
   .btn {
-    @apply relative inline-flex min-h-[48px] items-center justify-center gap-3 overflow-hidden rounded-full px-6 font-mono text-[12px] uppercase tracking-label transition-[transform,background-color,color,border-color] duration-300 ease-out active:scale-[0.97];
+    @apply relative inline-flex min-h-[48px] items-center justify-center gap-3 overflow-hidden rounded-sm px-6 font-mono text-[12px] uppercase tracking-label transition-[transform,background-color,color,border-color] duration-300 ease-out active:scale-[0.97];
   }
   .btn-solid {
     @apply btn bg-bone text-ink-950 hover:bg-sand;
@@ -114,6 +114,12 @@
   }
   .btn:hover .btn-arrow {
     transform: translateX(4px);
+  }
+  [dir='rtl'] .btn .btn-arrow {
+    transform: scaleX(-1);
+  }
+  [dir='rtl'] .btn:hover .btn-arrow {
+    transform: translateX(-4px) scaleX(-1);
   }
 
   /* Underline that draws on hover */
@@ -130,7 +136,7 @@
   }
 
   .chip {
-    @apply inline-flex min-h-[36px] items-center gap-2 rounded-full border border-[color:var(--line-strong)] px-4 font-mono text-[11px] uppercase tracking-label text-bone-dim transition-colors duration-200 hover:border-bone hover:text-bone;
+    @apply inline-flex min-h-[40px] items-center gap-2 rounded-sm border border-[color:var(--line-strong)] px-4 font-mono text-[11px] uppercase tracking-label text-bone-dim transition-colors duration-200 hover:border-bone hover:text-bone;
   }
   .chip[aria-pressed='true'] {
     @apply border-sand bg-sand text-ink-950;
@@ -141,14 +147,69 @@
   }
 
   .field {
-    @apply w-full rounded-xl border border-[color:var(--line-strong)] bg-ink-900 px-4 py-3 text-[15px] text-bone placeholder:text-bone-faint transition-colors focus:border-sand focus:outline-none;
+    @apply w-full rounded-sm border border-[color:var(--line-strong)] bg-ink-900 px-4 py-3 text-[15px] text-bone placeholder:text-bone-faint transition-colors focus:border-sand focus:outline-none;
   }
   .field-label {
     @apply mb-2 block font-mono text-[11px] uppercase tracking-label text-bone-mute;
   }
 
   .skip-link {
-    @apply fixed left-4 top-4 z-[200] -translate-y-24 rounded-full bg-bone px-5 py-3 font-mono text-xs uppercase text-ink-950 transition-transform focus:translate-y-0;
+    @apply fixed start-4 top-4 z-[200] -translate-y-24 rounded-sm bg-bone px-5 py-3 font-mono text-xs uppercase text-ink-950 transition-transform focus:translate-y-0;
+  }
+}
+
+/* ─────────────────────────────────────────────
+   Arabic / right-to-left
+   Arabic is set in IBM Plex Sans Arabic; it takes no capitals, tracking or negative spacing.
+   ───────────────────────────────────────────── */
+@layer components {
+  :lang(ar) body,
+  [lang='ar'] {
+    font-family: 'IBM Plex Sans Arabic', 'Inter Tight', system-ui, sans-serif;
+  }
+  [lang='ar'] .label,
+  [lang='ar'] .field-label,
+  [lang='ar'] .btn,
+  [lang='ar'] .chip {
+    font-family: 'IBM Plex Sans Arabic', system-ui, sans-serif;
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: 13px;
+  }
+  [lang='ar'] .display {
+    letter-spacing: 0;
+    line-height: 1.15;
+  }
+  [lang='ar'] .lede {
+    line-height: 1.55;
+  }
+  [lang='ar'] .display,
+  [lang='ar'] .font-sans,
+  [lang='ar'] .font-display {
+    font-family: 'IBM Plex Sans Arabic', 'Inter Tight', system-ui, sans-serif;
+  }
+  /* Latin islands inside Arabic pages (the explorer, codes, software names) keep their own faces */
+  [lang='ar'] [lang='en'],
+  [lang='ar'] [lang='en'] .display,
+  [lang='ar'] [lang='en'] .font-sans {
+    font-family: 'Inter Tight', system-ui, sans-serif;
+  }
+  [lang='ar'] .font-mono {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+  }
+  [lang='ar'] [lang='en'] .label,
+  [lang='ar'] [lang='en'] .btn,
+  [lang='ar'] [lang='en'] .chip,
+  [lang='ar'] [lang='en'] .field-label {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-size: 11px;
+  }
+  /* arrows and chevrons point the reading direction */
+  [dir='rtl'] .icon-dir {
+    --tw-scale-x: -1;
+    transform: translate(var(--tw-translate-x), var(--tw-translate-y)) scaleX(var(--tw-scale-x));
   }
 }
 
@@ -178,18 +239,6 @@
   }
 }
 
-/* Marquee */
-@keyframes marquee {
-  to {
-    transform: translateX(-50%);
-  }
-}
-.marquee-track {
-  animation: marquee 38s linear infinite;
-}
-.marquee:hover .marquee-track {
-  animation-play-state: paused;
-}
 
 @media (prefers-reduced-motion: reduce) {
   html {
@@ -201,5 +250,75 @@
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+/* ─────────────────────────────────────────────
+   CV sheet (A4) — /cv preview, /cv/print → PDF
+   ───────────────────────────────────────────── */
+.cv-sheet {
+  width: 210mm;
+  min-height: 297mm;
+  padding: 16mm 15mm 14mm;
+  font-family: 'Inter Tight', system-ui, sans-serif;
+}
+[lang='ar'] .cv-sheet {
+  font-family: 'IBM Plex Sans Arabic', 'Inter Tight', system-ui, sans-serif;
+}
+.cv-h {
+  margin-bottom: 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #d9d4c9;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #7d5f33;
+}
+[lang='ar'] .cv-h {
+  font-family: 'IBM Plex Sans Arabic', system-ui, sans-serif;
+  font-size: 11px;
+  letter-spacing: 0;
+}
+@media (max-width: 860px) {
+  .cv-frame { zoom: 0.85; }
+}
+@media (max-width: 680px) {
+  .cv-frame { zoom: 0.62; }
+}
+@media (max-width: 480px) {
+  .cv-frame { zoom: 0.44; }
+}
+body.cv-print {
+  background: #fbfaf7;
+}
+@page {
+  size: A4;
+  margin: 0;
+}
+@media print {
+  html,
+  body {
+    background: #fbfaf7 !important;
+  }
+  .site-chrome,
+  .skip-link,
+  .no-print {
+    display: none !important;
+  }
+  .cv-page {
+    padding: 0 !important;
+  }
+  .cv-page > :not(:last-child) {
+    display: none !important;
+  }
+  .cv-frame {
+    zoom: 1 !important;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+  .cv-sheet {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 }

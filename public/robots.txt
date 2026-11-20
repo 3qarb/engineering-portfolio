@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /render/
+Disallow: /cv/print
+Disallow: /ar/cv/print
+Disallow: /projects/new

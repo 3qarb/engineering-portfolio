@@ -5,9 +5,9 @@ import { buildings } from '../../data/buildings';
 import { buildingBounds } from '../../lib/structure/generate';
 import { StructureModel, type HeroMotion } from './StructureModel';
 import { Stage } from './Stage';
+import { QUALITY, useQuality, prefersReducedMotion } from '../../lib/device';
 
 const HOUSE = { ...buildings.find((b) => b.id === 'bayt-al-balad')!, site: { x: 0, z: 0 } };
-const reducedMotion = () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 function fitOrtho(cam: THREE.OrthographicCamera, w: number, h: number, height: number) {
   cam.zoom = Math.min(h / (height * 1.55), w / (height * 1.25));
@@ -48,7 +48,8 @@ function Turntable({ children, still }: { children: React.ReactNode; still: bool
 export default function HeroStructure() {
   const wrap = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(true);
-  const still = useMemo(() => reducedMotion(), []);
+  const still = useMemo(() => prefersReducedMotion(), []);
+  const quality = useQuality((s) => s.quality);
   const { h } = buildingBounds(HOUSE);
   const total = h + HOUSE.floors * 1.9;
 
@@ -77,7 +78,7 @@ export default function HeroStructure() {
         orthographic
         shadows
         frameloop={visible ? 'always' : 'never'}
-        dpr={[1, 1.5]}
+        dpr={QUALITY[quality].dpr}
         camera={{ position: [42, 34, 42], near: 0.1, far: 400, zoom: 20 }}
         gl={{ antialias: false }}
         onCreated={({ gl }) => {

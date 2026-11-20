@@ -1,5 +1,8 @@
-import { Component, lazy, Suspense, useEffect, type ReactNode } from 'react';
-import { MousePointerClick, Move3d } from 'lucide-react';
+import { Component, lazy, Suspense, useEffect, useRef, useState, type ReactNode } from 'react';
+import { Info, MousePointerClick, Move3d } from 'lucide-react';
+import { hasWebGL } from '../../lib/device';
+import type { BuildingSpec } from '../../lib/structure/types';
+import { buildings as builtIn } from '../../data/buildings';
 import { elementsFor, levelName } from '../../lib/structure/generate';
 import { useAllBuildings, useAllProjects } from '../../store/projectsStore';
 import { useExplorer } from '../../store/explorerStore';
@@ -29,6 +32,30 @@ class SceneBoundary extends Component<{ children: ReactNode }, { failed: boolean
     }
     return this.props.children;
   }
+}
+
+/** Shown when the browser has no WebGL: the pre-rendered image; the panel keeps working. */
+function StaticFallback({ spec }: { spec?: BuildingSpec }) {
+  const shown = spec && builtIn.some((b) => b.id === spec.id) ? spec : builtIn[1];
+  return (
+    <div className="relative h-full w-full">
+      <img src={`/renders/${shown.id}.jpg`} alt={`Rendered 3D model: ${shown.name}`} className="h-full w-full object-cover" />
+      <p className="absolute inset-x-4 bottom-14 max-w-md border border-white/15 bg-ink-950/85 p-4 text-[14px] leading-snug text-bone-dim">
+        This browser cannot show the interactive 3D view, so a rendered image is shown instead. Buildings, members,
+        section drawings and schedules still work from the panel.
+      </p>
+    </div>
+  );
+}
+
+/** Tag on the canvas: these models use typical sizes unless the spec says otherwise. */
+function BasisTag({ spec }: { spec?: BuildingSpec }) {
+  if (spec?.basis === 'project') return null;
+  return (
+    <p className="label pointer-events-none flex items-center gap-1.5 text-bone-mute" title="Typical member sizes chosen to show the structural system. Not a project design.">
+      <Info className="h-3 w-3" /> Illustrative model · typical sizes
+    </p>
+  );
 }
 
 function Loading() {
@@ -79,6 +106,7 @@ function SiteLabels() {
 
 /** Small readout of what the pointer is over, bottom-left of the canvas. */
 function HoverReadout() {
+  const touch = typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
   const buildings = useAllBuildings();
   const buildingId = useExplorer((s) => s.buildingId);
   const hoverEl = useExplorer((s) => s.hoverElementId);
@@ -95,16 +123,16 @@ function HoverReadout() {
           </>
         ) : spec ? (
           <>
-            <MousePointerClick className="h-3.5 w-3.5" /> Click a member
+            <MousePointerClick className="h-3.5 w-3.5" /> {touch ? 'Tap a member' : 'Click a member'}
           </>
         ) : (
           <>
-            <MousePointerClick className="h-3.5 w-3.5" /> Click a building
+            <MousePointerClick className="h-3.5 w-3.5" /> {touch ? 'Tap a building' : 'Click a building'}
           </>
         )}
       </div>
       <div className="label hidden items-center gap-2 sm:flex">
-        <Move3d className="h-3.5 w-3.5" /> Drag to orbit · scroll to zoom
+        <Move3d className="h-3.5 w-3.5" /> {touch ? 'Drag to orbit · pinch to zoom' : 'Drag to orbit · scroll to zoom'}
       </div>
     </div>
   );
@@ -129,16 +157,35 @@ export function Explorer({ lockBuildingId, className }: { lockBuildingId?: strin
   const spec = buildings.find((b) => b.id === buildingId);
   const el = spec && elementId ? elementsFor(spec).find((e) => e.id === elementId) : undefined;
 
+  // render only while the canvas is on screen
+  const stage = useRef<HTMLDivElement>(null);
+  const [active, setActive] = useState(true);
+  const [gl] = useState(hasWebGL);
+  useEffect(() => {
+    const node = stage.current;
+    if (!node) return;
+    const io = new IntersectionObserver(([e]) => setActive(e.isIntersecting), { rootMargin: '120px' });
+    io.observe(node);
+    return () => io.disconnect();
+  }, []);
+
   return (
-    <div className={cn('grid overflow-hidden lg:grid-cols-[minmax(0,1fr)_420px]', className)}>
-      <div className="relative h-[72vh] min-h-[480px] bg-ink-950 lg:h-full">
-        <SceneBoundary>
-          <Suspense fallback={<Loading />}>
-            <SiteScene buildings={buildings} locked={!!lockBuildingId} />
-          </Suspense>
-        </SceneBoundary>
-        <SiteLabels />
+    <div dir="ltr" lang="en" className={cn('grid overflow-hidden lg:grid-cols-[minmax(0,1fr)_420px]', className)}>
+      <div ref={stage} className="relative h-[68svh] min-h-[420px] bg-ink-950 lg:h-full">
+        {gl ? (
+          <SceneBoundary>
+            <Suspense fallback={<Loading />}>
+              <SiteScene buildings={buildings} locked={!!lockBuildingId} active={active} />
+            </Suspense>
+          </SceneBoundary>
+        ) : (
+          <StaticFallback spec={spec} />
+        )}
+        {gl && <SiteLabels />}
         <HoverReadout />
+        <div className="pointer-events-none absolute bottom-10 left-4 sm:bottom-11">
+          <BasisTag spec={spec} />
+        </div>
         <div className="pointer-events-none absolute left-3 right-24 top-3 sm:left-4 sm:top-4">
           <Toolbar spec={spec} />
         </div>

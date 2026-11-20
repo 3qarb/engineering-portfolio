@@ -10,6 +10,7 @@ import { useExplorer } from '../../store/explorerStore';
 import { SectionDrawing } from './SectionDrawing';
 import { Schedule } from './Schedule';
 import { cageFor } from '../../lib/structure/rebar';
+import { useLocalePath } from '../../i18n/lang';
 
 const ease = [0.22, 1, 0.36, 1] as const;
 const enter = {
@@ -94,6 +95,7 @@ function SiteList({ buildings, projects }: { buildings: BuildingSpec[]; projects
 /* ── State B: a building ───────────────────────────────────── */
 
 function BuildingDetail({ spec, project, locked }: { spec: BuildingSpec; project?: AnyProject; locked: boolean }) {
+  const lp = useLocalePath();
   const selectBuilding = useExplorer((s) => s.selectBuilding);
   const selectElement = useExplorer((s) => s.selectElement);
   const exploded = useExplorer((s) => s.exploded);
@@ -127,7 +129,7 @@ function BuildingDetail({ spec, project, locked }: { spec: BuildingSpec; project
         <p className="label mb-4 text-sand">{SYSTEM_LABEL[spec.system]}</p>
         <h2 className="display text-[clamp(34px,3.3vw,52px)] [overflow-wrap:anywhere]">{spec.name}</h2>
         {project && (
-          <Link to={`/projects/${project.slug}`} className="link-draw mt-3 inline-block text-[15px] text-bone-dim hover:text-bone">
+          <Link to={lp(`/projects/${project.slug}`)} className="link-draw mt-3 inline-block text-[15px] text-bone-dim hover:text-bone">
             {project.title}
           </Link>
         )}
@@ -142,10 +144,15 @@ function BuildingDetail({ spec, project, locked }: { spec: BuildingSpec; project
         <Row label="Footprint" value={`${fmt(w, 1)} × ${fmt(d, 1)} m`} />
         <Row label="Height" value={`${fmt(h, 1)} m`} />
       </dl>
+      {spec.basis !== 'project' && (
+        <p className="-mt-4 border-l-2 border-sand/60 pl-3 text-[13px] leading-snug text-bone-mute">
+          Illustrative model: typical member sizes chosen to show the structural system, not values from a project drawing.
+        </p>
+      )}
 
       {project && (project.role || project.responsibilities.length > 0) && (
         <section aria-labelledby="resp">
-          <p id="resp" className="label mb-3">My responsibility</p>
+          <p id="resp" className="label mb-3">{project.kind === 'study' ? 'Related work' : 'My responsibility'}</p>
           {project.role && <p className="mb-4 text-[24px] font-medium leading-tight tracking-[-0.02em] text-sand">{project.role}</p>}
           <ul className="flex flex-col gap-2.5">
             {project.responsibilities.slice(0, 6).map((r) => (

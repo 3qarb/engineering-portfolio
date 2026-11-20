@@ -1,102 +1,106 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { ArrowRight, Box } from 'lucide-react';
+import { ArrowRight, Download } from 'lucide-react';
 import { LineReveal } from '../ui/Motion';
-import { useUi } from '../../store/uiStore';
+import { profile } from '../../data/profile';
+import { hasWebGL } from '../../lib/device';
+import { useLocalePath, useProfile, useT } from '../../i18n';
 
 const HeroStructure = lazy(() => import('../three/HeroStructure'));
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
-const FACTS = [
-  { k: '300+', v: 'historic buildings in Al-Balad' },
-  { k: '2022', v: 'technical office, IKK Group' },
-  { k: 'ETABS · SAP2000', v: 'AutoCAD · Revit' },
-];
-
 export function Hero() {
-  const introDone = useUi((s) => s.introDone);
-  const d = introDone ? 0.1 : 9; // hold the entrance until the preloader lifts
+  const t = useT();
+  const p = useProfile();
+  const lp = useLocalePath();
+  const [gl] = useState(hasWebGL);
+  const d = 0.1;
+  const words = p.name.split(' ');
+  const nameLines = [words.slice(0, 2).join(' '), words.slice(2).join(' ')].filter(Boolean);
 
   return (
     <section className="relative isolate overflow-hidden" aria-labelledby="hero-title">
-      <div className="absolute inset-0 -z-10 md:left-[28%]">
-        <Suspense fallback={null}>
-          <HeroStructure />
-        </Suspense>
+      <div className="absolute inset-0 -z-10 md:start-[40%]">
+        {gl ? (
+          <Suspense fallback={null}>
+            <HeroStructure />
+          </Suspense>
+        ) : (
+          <img src="/renders/bayt-al-balad.jpg" alt="" className="h-full w-full object-cover opacity-80" />
+        )}
       </div>
       <div
-        className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-t from-ink-950 via-ink-950/85 to-ink-950/25 md:bg-[linear-gradient(90deg,rgba(9,9,10,0.94)_0%,rgba(9,9,10,0.7)_32%,transparent_58%)]"
+        className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-t from-ink-950 via-ink-950/85 to-ink-950/25 md:bg-[linear-gradient(90deg,rgba(9,9,10,0.95)_0%,rgba(9,9,10,0.72)_34%,transparent_60%)] md:rtl:bg-[linear-gradient(270deg,rgba(9,9,10,0.95)_0%,rgba(9,9,10,0.72)_34%,transparent_60%)]"
         aria-hidden="true"
       />
 
-      <div className="wrap flex min-h-[100svh] flex-col justify-end pb-8 pt-[calc(var(--header-h)+56px)] sm:pb-10">
-        {introDone && (
-          <>
-            <motion.div
-              className="mb-6 flex items-center gap-3"
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0, transition: { delay: d, duration: 0.7, ease } }}
-            >
-              <span className="h-1.5 w-1.5 rounded-full bg-sand" />
-              <span className="label text-bone">Abdulaziz Kanaan · Jeddah, Saudi Arabia</span>
-            </motion.div>
+      <div className="wrap flex min-h-[100svh] flex-col justify-end pb-8 pt-[calc(var(--header-h)+48px)] sm:pb-10">
+        <motion.p
+          className="mb-6 flex items-center gap-3"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0, transition: { delay: d, duration: 0.7, ease } }}
+        >
+          <span className="h-1.5 w-1.5 bg-sand" aria-hidden="true" />
+          <span className="label text-bone">{t.home.eyebrow}</span>
+        </motion.p>
 
-            <LineReveal
-              lines={[
-                'Structural',
-                'engineer',
-              ]}
-              className="display h-xl"
-              delay={d}
-            />
-            <motion.p
-              className="mt-3 text-[clamp(20px,2.3vw,34px)] font-normal tracking-[-0.02em] text-bone-mute"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1, transition: { delay: d + 0.25, duration: 0.8 } }}
-            >
-              for buildings that have to last
-            </motion.p>
+        <LineReveal id="hero-title" lines={nameLines} className="display text-[clamp(40px,6.5vw,112px)]" delay={d} />
 
-            <div className="mt-8 grid items-end gap-8 lg:grid-cols-[minmax(0,1fr)_auto]">
-              <motion.p
-                className="max-w-[46ch] text-[17px] leading-relaxed text-bone-dim sm:text-[19px]"
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0, transition: { delay: d + 0.35, duration: 0.8, ease } }}
-              >
-                Technical office engineer on the restoration of 300+ historic buildings in Jeddah's Al-Balad, a UNESCO
-                World Heritage site. I size the members, draw the details and design the works that hold a building up
-                while it is saved.
-              </motion.p>
-              <motion.div
-                className="flex flex-col gap-3 sm:flex-row"
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0, transition: { delay: d + 0.45, duration: 0.8, ease } }}
-              >
-                <Link to="/explorer" className="btn-solid">
-                  <Box className="h-4 w-4" /> Explore the structures
-                </Link>
-                <Link to="/projects" className="btn-ghost">
-                  See the work <ArrowRight className="btn-arrow h-4 w-4" />
-                </Link>
-              </motion.div>
+        <motion.ul
+          className="mt-5 flex flex-wrap gap-x-5 gap-y-2"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1, transition: { delay: d + 0.3, duration: 0.8 } }}
+          aria-label={p.title}
+        >
+          {p.titles.map((x, i) => (
+            <li key={x} className="flex items-center gap-5 text-[clamp(17px,1.7vw,24px)] tracking-[-0.01em] text-bone-dim">
+              {i > 0 && <span className="h-3 w-px bg-white/25" aria-hidden="true" />}
+              {x}
+            </li>
+          ))}
+        </motion.ul>
+
+        <div className="mt-8 grid items-end gap-8 lg:grid-cols-[minmax(0,1fr)_auto]">
+          <motion.p
+            className="max-w-[52ch] text-[16px] leading-relaxed text-bone-dim sm:text-[18px]"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0, transition: { delay: d + 0.4, duration: 0.8, ease } }}
+          >
+            {p.positioning}
+          </motion.p>
+          <motion.div
+            className="flex flex-col gap-3 sm:flex-row"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0, transition: { delay: d + 0.5, duration: 0.8, ease } }}
+          >
+            <Link to={lp('/projects')} className="btn-solid">
+              {t.common.viewProjects} <ArrowRight className="btn-arrow h-4 w-4" />
+            </Link>
+            <a href={profile.cvUrl} download className="btn-ghost">
+              <Download className="h-4 w-4" /> {t.common.downloadCv}
+            </a>
+          </motion.div>
+        </div>
+
+        <motion.dl
+          className="mt-10 grid grid-cols-1 border-t border-white/10 sm:grid-cols-3"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1, transition: { delay: d + 0.65, duration: 1 } }}
+        >
+          {t.home.facts.map((f) => (
+            <div
+              key={f.k}
+              className="flex flex-col-reverse gap-1.5 border-b border-white/10 py-4 sm:border-b-0 sm:border-e sm:px-5 sm:first:ps-0 sm:last:border-e-0"
+            >
+              <dt className="label">{f.v}</dt>
+              <dd className="font-mono text-[13px] text-bone">
+                <bdi dir="ltr">{f.k}</bdi>
+              </dd>
             </div>
-
-            <motion.dl
-              className="mt-10 grid grid-cols-1 border-t border-white/10 sm:grid-cols-3"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1, transition: { delay: d + 0.6, duration: 1 } }}
-            >
-              {FACTS.map((f) => (
-                <div key={f.k} className="flex flex-col gap-1.5 border-b border-white/10 py-4 sm:border-b-0 sm:border-r sm:px-5 sm:first:pl-0 sm:last:border-r-0">
-                  <dt className="font-mono text-[13px] text-bone">{f.k}</dt>
-                  <dd className="label">{f.v}</dd>
-                </div>
-              ))}
-            </motion.dl>
-          </>
-        )}
+          ))}
+        </motion.dl>
       </div>
     </section>
   );

@@ -15,8 +15,8 @@ export default {
         bone: {
           DEFAULT: '#ece7df',
           dim: '#b9b3aa',
-          mute: '#8a857d',
-          faint: '#5c5852',
+          mute: '#958f86', // 6.2:1 on ink-950
+          faint: '#807a72', // 4.7:1 on ink-950 — smallest text allowed
         },
         sand: {
           DEFAULT: '#c9a46c',
@@ -29,6 +29,7 @@ export default {
         display: ['"Inter Tight"', 'system-ui', 'sans-serif'],
         sans: ['"Inter Tight"', 'system-ui', 'sans-serif'],
         mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
+        arabic: ['"IBM Plex Sans Arabic"', '"Inter Tight"', 'system-ui', 'sans-serif'],
       },
       letterSpacing: {
         label: '0.14em',
@@ -36,6 +37,16 @@ export default {
       transitionTimingFunction: {
         out: 'cubic-bezier(0.22, 1, 0.36, 1)',
         inout: 'cubic-bezier(0.65, 0, 0.35, 1)',
+      },
+      // one tight radius scale: drawing-sheet corners, not app cards
+      borderRadius: {
+        sm: '2px',
+        DEFAULT: '2px',
+        md: '3px',
+        lg: '3px',
+        xl: '4px',
+        '2xl': '4px',
+        '3xl': '4px',
       },
       maxWidth: {
         site: '1440px',

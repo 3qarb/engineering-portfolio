@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { CameraControls } from '@react-three/drei';
+import { CameraControls, PerformanceMonitor } from '@react-three/drei';
 import * as THREE from 'three';
 import type { BuildingSpec } from '../../lib/structure/types';
 import { buildingBounds, elementsFor } from '../../lib/structure/generate';
@@ -11,9 +11,9 @@ import { Stage } from './Stage';
 import { cutPlane } from './render/materials';
 import { labelEls } from './labels';
 import { bridge, VIEWS } from './bridge';
+import { QUALITY, useQuality, prefersReducedMotion } from '../../lib/device';
 
 const SITE_VIEW: [number, number, number, number, number, number] = [86, 64, 98, -1, 4, 6];
-const reduced = () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 function CameraRig({ buildings, locked }: { buildings: BuildingSpec[]; locked: boolean }) {
   const ref = useRef<CameraControls>(null);
@@ -21,7 +21,7 @@ function CameraRig({ buildings, locked }: { buildings: BuildingSpec[]; locked: b
   const exploded = useExplorer((s) => s.exploded);
   const elementId = useExplorer((s) => s.elementId);
   const lastTouch = useRef(0);
-  const still = useRef(reduced());
+  const still = useRef(prefersReducedMotion());
 
   useEffect(() => {
     bridge.controls = ref.current;
@@ -127,7 +127,10 @@ function LabelProjector({ buildings }: { buildings: BuildingSpec[] }) {
   return null;
 }
 
-export function SiteScene({ buildings, locked = false }: { buildings: BuildingSpec[]; locked?: boolean }) {
+export function SiteScene({ buildings, locked = false, active = true }: { buildings: BuildingSpec[]; locked?: boolean; active?: boolean }) {
+  const quality = useQuality((s) => s.quality);
+  const stepDown = useQuality((s) => s.stepDown);
+  const [antialias] = useState(() => quality === 'low');
   const buildingId = useExplorer((s) => s.buildingId);
   const style = useExplorer((s) => s.style);
   const sunHour = useExplorer((s) => s.sunHour);
@@ -152,8 +155,9 @@ export function SiteScene({ buildings, locked = false }: { buildings: BuildingSp
     <Canvas
       shadows
       camera={{ position: [SITE_VIEW[0], SITE_VIEW[1], SITE_VIEW[2]], fov: 30, near: 0.5, far: 900 }}
-      dpr={[1, 1.5]}
-      gl={{ antialias: false, preserveDrawingBuffer: true, powerPreference: 'high-performance' }}
+      dpr={QUALITY[quality].dpr}
+      frameloop={active ? 'always' : 'never'}
+      gl={{ antialias, preserveDrawingBuffer: true, powerPreference: 'high-performance' }}
       onCreated={({ gl }) => {
         gl.localClippingEnabled = true;
         bridge.canvas = gl.domElement;
@@ -167,6 +171,8 @@ export function SiteScene({ buildings, locked = false }: { buildings: BuildingSp
         selectElement(null);
       }}
     >
+      {/* steps the quality down when the frame rate stays low (auto mode only) */}
+      <PerformanceMonitor onDecline={stepDown} flipflops={2} />
       <Stage center={frame.center} radius={frame.radius} sunHour={sunHour} realistic={style === 'realistic'} ao={style !== 'hidden'} />
       {buildings.map((b) => {
         // like Revit's isolate: the opened building is shown on its own

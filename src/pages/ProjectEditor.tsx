@@ -17,6 +17,19 @@ import { makeRcSections } from '../lib/structure/generate';
 import type { BuildingSpec, StructuralSystem } from '../lib/structure/types';
 import { SYSTEM_LABEL } from '../lib/structure/types';
 import { slugify, useAllProjects, useProjectsStore, type UserProject } from '../store/projectsStore';
+import type { Figure } from '../data/projects';
+import { Seo } from '../components/Seo';
+
+/** "Label: value" lines ↔ technical detail rows */
+const toTechnical = (s: string) =>
+  lines(s)
+    .map((l) => {
+      const k = l.indexOf(':');
+      return k > 0 ? { label: l.slice(0, k).trim(), value: l.slice(k + 1).trim() } : { label: l, value: '' };
+    })
+    .filter((r) => r.label && r.value);
+const fromTechnical = (rows?: { label: string; value: string }[]) => (rows ?? []).map((r) => `${r.label}: ${r.value}`).join('\n');
+const MAX_FIGURES = 4;
 
 interface Model {
   enabled: boolean;
@@ -183,8 +196,14 @@ export function ProjectEditor() {
     period: existing?.period ?? '',
     status: existing?.status ?? 'completed',
     role: existing?.role ?? '',
+    summary: existing?.summary ?? '',
     overview: existing?.overview ?? '',
     context: existing?.engineeringContext ?? '',
+    scope: existing?.scope?.join('\n') ?? '',
+    existing: existing?.existingConditions ?? '',
+    method: existing?.methodology ?? '',
+    technical: fromTechnical(existing?.technical),
+    drawings: existing?.drawings.join('\n') ?? '',
     responsibilities: existing?.responsibilities.join('\n') ?? '',
     challenges: existing?.challenges.join('\n') ?? '',
     solutions: existing?.solutions.join('\n') ?? '',
@@ -193,6 +212,7 @@ export function ProjectEditor() {
   });
   const [m, setM] = useState<Model>(existing ? fromSpec(existing.building) : DEFAULT_MODEL);
   const [error, setError] = useState('');
+  const [figures, setFigures] = useState<Figure[]>(existing?.gallery ?? []);
 
   const set = (k: keyof typeof f) => (e: { target: { value: string } }) => setF((s) => ({ ...s, [k]: e.target.value }));
   const num = (k: keyof Model) => (e: { target: { value: string } }) => setM((s) => ({ ...s, [k]: Number(e.target.value) }));
@@ -228,15 +248,21 @@ export function ProjectEditor() {
       thumbnail: '',
       images: [],
       cover: f.cover || undefined,
+      kind: 'project',
+      summary: f.summary.trim() || undefined,
       overview: f.overview.trim(),
       engineeringContext: f.context.trim(),
+      existingConditions: f.existing.trim() || undefined,
+      scope: lines(f.scope),
+      technical: toTechnical(f.technical),
+      gallery: figures,
       responsibilities: lines(f.responsibilities),
       challenges: lines(f.challenges),
       structuralAssessment: '',
-      methodology: '',
+      methodology: f.method.trim(),
       solutions: lines(f.solutions),
       software: f.software.split(',').map((s) => s.trim()).filter(Boolean),
-      drawings: [],
+      drawings: lines(f.drawings),
       featured: false,
       userCreated: true,
       building: m.enabled ? toSpec(m, newSlug, short) : undefined,
@@ -262,7 +288,8 @@ export function ProjectEditor() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="wrap pb-32 pt-[calc(var(--header-h)+64px)] sm:pt-[calc(var(--header-h)+96px)]" noValidate>
+    <form onSubmit={onSubmit} lang="en" dir="ltr" className="wrap pb-32 pt-[calc(var(--header-h)+64px)] sm:pt-[calc(var(--header-h)+96px)]" noValidate>
+      <Seo title={`${existing ? 'Edit project' : 'Add a project'} — Abdulaziz Kanaan`} description="Project editor" noindex />
       <Link to="/projects" className="label mb-10 inline-flex min-h-[44px] items-center gap-2 hover:text-bone">
         <ArrowLeft className="h-3.5 w-3.5" /> All projects
       </Link>
@@ -295,18 +322,24 @@ export function ProjectEditor() {
       </Group>
 
       <Group index="02" title="Story">
+        <Field label="One-line summary (lists and cards)" span={2}><input className="field" value={f.summary} onChange={set('summary')} maxLength={160} /></Field>
         <Field label="Overview" span={2}><textarea className="field min-h-[120px]" value={f.overview} onChange={set('overview')} /></Field>
+        <Field label="Scope of work, one per line" span={2}><textarea className="field min-h-[110px]" value={f.scope} onChange={set('scope')} /></Field>
+        <Field label="Existing structure / conditions" span={2}><textarea className="field min-h-[100px]" value={f.existing} onChange={set('existing')} /></Field>
         <Field label="Your responsibilities, one per line" span={2}><textarea className="field min-h-[140px]" value={f.responsibilities} onChange={set('responsibilities')} /></Field>
         <Field label="Context" span={2}><textarea className="field min-h-[100px]" value={f.context} onChange={set('context')} /></Field>
         <Field label="Challenges, one per line"><textarea className="field min-h-[120px]" value={f.challenges} onChange={set('challenges')} /></Field>
-        <Field label="Outcomes, one per line"><textarea className="field min-h-[120px]" value={f.solutions} onChange={set('solutions')} /></Field>
+        <Field label="Structural solutions, one per line"><textarea className="field min-h-[120px]" value={f.solutions} onChange={set('solutions')} /></Field>
+        <Field label="Assessment and method" span={2}><textarea className="field min-h-[110px]" value={f.method} onChange={set('method')} /></Field>
+        <Field label="Technical details, one per line as Label: value"><textarea className="field min-h-[120px]" value={f.technical} onChange={set('technical')} placeholder={'Storeys: 4\nFoundation: Strip footings'} /></Field>
+        <Field label="Drawings and calculations, one per line"><textarea className="field min-h-[120px]" value={f.drawings} onChange={set('drawings')} /></Field>
         <Field label="Software, comma separated" span={2}><input className="field" value={f.software} onChange={set('software')} placeholder="ETABS, SAP2000, AutoCAD" /></Field>
         <div className="sm:col-span-2">
           <span className="field-label">Cover photo</span>
           {f.cover ? (
             <div className="relative w-fit">
-              <img src={f.cover} alt="Cover preview" className="h-48 rounded-xl object-cover" />
-              <button type="button" onClick={() => setF((s) => ({ ...s, cover: '' }))} className="absolute right-2 top-2 grid h-9 w-9 place-items-center rounded-full bg-ink-950/80 text-bone" aria-label="Remove the cover photo">
+              <img src={f.cover} alt="Cover preview" className="h-48 rounded-sm object-cover" />
+              <button type="button" onClick={() => setF((s) => ({ ...s, cover: '' }))} className="absolute right-2 top-2 grid h-9 w-9 place-items-center bg-ink-950/80 text-bone" aria-label="Remove the cover photo">
                 <X className="h-4 w-4" />
               </button>
             </div>
@@ -325,6 +358,38 @@ export function ProjectEditor() {
               }} />
             </label>
           )}
+        </div>
+        <div className="sm:col-span-2">
+          <span className="field-label">Figures (photos, drawings) · up to {MAX_FIGURES}</span>
+          <div className="flex flex-wrap gap-4">
+            {figures.map((fig, k) => (
+              <div key={fig.src.slice(-24) + k} className="flex w-44 flex-col gap-2">
+                <div className="relative">
+                  <img src={fig.src} alt={fig.alt || 'Figure preview'} className="aspect-[4/3] w-full border border-white/10 object-cover" />
+                  <button type="button" onClick={() => setFigures((x) => x.filter((_, j) => j !== k))} className="absolute end-1.5 top-1.5 grid h-9 w-9 place-items-center bg-ink-950/85 text-bone" aria-label={`Remove figure ${k + 1}`}>
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+                <input className="field py-2 text-[13px]" placeholder="Describe the picture" value={fig.alt} aria-label={`Description of figure ${k + 1}`} onChange={(e) => setFigures((x) => x.map((g, j) => (j === k ? { ...g, alt: e.target.value, caption: e.target.value } : g)))} />
+              </div>
+            ))}
+            {figures.length < MAX_FIGURES && (
+              <label className="btn-ghost h-fit cursor-pointer">
+                <ImagePlus className="h-4 w-4" /> Add a figure
+                <input type="file" accept="image/*" className="sr-only" onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  e.target.value = '';
+                  if (!file) return;
+                  try {
+                    const src = await readImage(file, 1280);
+                    setFigures((x) => [...x, { src, alt: '' }]);
+                  } catch {
+                    setError('That image could not be read.');
+                  }
+                }} />
+              </label>
+            )}
+          </div>
         </div>
       </Group>
 
@@ -374,7 +439,7 @@ export function ProjectEditor() {
             )}
           </div>
           {m.enabled && (
-            <div className="sticky top-28 aspect-square self-start overflow-hidden rounded-3xl border border-white/10 bg-ink-950">
+            <div className="sticky top-28 aspect-square self-start overflow-hidden rounded-sm border border-white/10 bg-ink-950">
               <Suspense fallback={<span className="label grid h-full place-items-center">Building the preview…</span>}>
                 <ModelPreview spec={preview} onCanvas={(c) => (canvasRef.current = c)} />
               </Suspense>
