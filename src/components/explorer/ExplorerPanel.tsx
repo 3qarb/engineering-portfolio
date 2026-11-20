@@ -61,8 +61,8 @@ function SiteList({ buildings, projects }: { buildings: BuildingSpec[]; projects
         <p className="label mb-4">Site plan · {buildings.length} structures</p>
         <h2 className="display text-[clamp(34px,3.3vw,52px)] [overflow-wrap:anywhere]">Pick a building</h2>
         <p className="mt-4 text-[15px] leading-relaxed text-bone-dim">
-          Every block is a structure from my work. Open one to see my role in it, then take it apart storey by storey and
-          read any member's size and reinforcement.
+          Each structure stands for a project or a technical study. Open one to see the work behind it, then take it apart
+          storey by storey and read any member's size and reinforcement. Member sizes are typical, chosen to show each system.
         </p>
       </div>
       <ol className="flex flex-col">

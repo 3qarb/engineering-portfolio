@@ -86,17 +86,18 @@ function SiteLabels() {
               else labelEls.delete(b.id);
             }}
             type="button"
+            aria-label={b.name}
             onClick={() => selectBuilding(b.id)}
             onMouseEnter={() => hoverBuilding(b.id)}
             onMouseLeave={() => hoverBuilding(null)}
             style={{ opacity: 0 }}
             className={cn(
-              'pointer-events-auto absolute left-0 top-0 flex min-h-[40px] items-center gap-3 whitespace-nowrap rounded-full border px-4 font-mono text-[11px] uppercase tracking-[0.14em] backdrop-blur-md transition-[background-color,border-color,color] duration-300',
+              'pointer-events-auto absolute left-0 top-0 flex min-h-[44px] min-w-[44px] justify-center items-center gap-2 whitespace-nowrap rounded-sm border px-3 sm:gap-3 sm:px-4 font-mono text-[11px] uppercase tracking-[0.14em] backdrop-blur-md transition-[background-color,border-color,color] duration-300',
               on ? 'border-sand bg-sand text-ink-950' : 'border-white/15 bg-ink-950/70 text-bone hover:border-sand',
             )}
           >
             <span className={on ? 'text-ink-950' : 'text-sand'}>{String(i + 1).padStart(2, '0')}</span>
-            {b.name}
+            <span className="hidden sm:inline">{b.name}</span>
           </button>
         );
       })}

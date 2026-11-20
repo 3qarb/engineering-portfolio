@@ -51,7 +51,7 @@ export function ViewCube() {
       <button
         type="button"
         onClick={() => goToView('home')}
-        className="grid h-8 w-8 place-items-center rounded-full border border-white/15 bg-ink-900/80 text-bone-dim transition-colors hover:border-sand hover:text-sand"
+        className="grid h-9 w-9 place-items-center rounded-full border border-white/15 bg-ink-900/80 [@media(pointer:coarse)]:h-11 [@media(pointer:coarse)]:w-11 text-bone-dim transition-colors hover:border-sand hover:text-sand"
         aria-label="Home view"
       >
         <Home className="h-3.5 w-3.5" />

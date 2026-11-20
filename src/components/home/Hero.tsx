@@ -22,7 +22,8 @@ export function Hero() {
 
   return (
     <section className="relative isolate overflow-hidden" aria-labelledby="hero-title">
-      <div className="absolute inset-0 -z-10 md:start-[40%]">
+      {/* phones: the model is a band under the header; md+: it fills the right of the hero */}
+      <div className="relative -z-10 mt-[var(--header-h)] h-[42svh] min-h-[260px] md:absolute md:inset-0 md:start-[40%] md:mt-0 md:h-auto">
         {gl ? (
           <Suspense fallback={null}>
             <HeroStructure />
@@ -32,11 +33,11 @@ export function Hero() {
         )}
       </div>
       <div
-        className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-t from-ink-950 via-ink-950/85 to-ink-950/25 md:bg-[linear-gradient(90deg,rgba(9,9,10,0.95)_0%,rgba(9,9,10,0.72)_34%,transparent_60%)] md:rtl:bg-[linear-gradient(270deg,rgba(9,9,10,0.95)_0%,rgba(9,9,10,0.72)_34%,transparent_60%)]"
+        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[calc(var(--header-h)+42svh)] min-h-[calc(var(--header-h)+260px)] bg-[linear-gradient(0deg,#09090a_0%,rgba(9,9,10,0)_38%)] md:inset-0 md:h-auto md:bg-[linear-gradient(90deg,rgba(9,9,10,0.95)_0%,rgba(9,9,10,0.72)_34%,transparent_60%)] md:rtl:bg-[linear-gradient(270deg,rgba(9,9,10,0.95)_0%,rgba(9,9,10,0.72)_34%,transparent_60%)]"
         aria-hidden="true"
       />
 
-      <div className="wrap flex min-h-[100svh] flex-col justify-end pb-8 pt-[calc(var(--header-h)+48px)] sm:pb-10">
+      <div className="wrap -mt-10 flex flex-col pb-10 md:mt-0 md:min-h-[100svh] md:justify-end md:pb-10 md:pt-[calc(var(--header-h)+48px)]">
         <motion.p
           className="mb-6 flex items-center gap-3"
           initial={{ opacity: 0, y: 12 }}
@@ -49,14 +50,14 @@ export function Hero() {
         <LineReveal id="hero-title" lines={nameLines} className="display text-[clamp(40px,6.5vw,112px)]" delay={d} />
 
         <motion.ul
-          className="mt-5 flex flex-wrap gap-x-5 gap-y-2"
+          className="mt-5 flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:gap-x-5 sm:gap-y-2"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1, transition: { delay: d + 0.3, duration: 0.8 } }}
           aria-label={p.title}
         >
           {p.titles.map((x, i) => (
             <li key={x} className="flex items-center gap-5 text-[clamp(17px,1.7vw,24px)] tracking-[-0.01em] text-bone-dim">
-              {i > 0 && <span className="h-3 w-px bg-white/25" aria-hidden="true" />}
+              {i > 0 && <span className="hidden h-3 w-px bg-white/25 sm:block" aria-hidden="true" />}
               {x}
             </li>
           ))}

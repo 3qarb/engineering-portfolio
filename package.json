@@ -5,9 +5,13 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && node scripts/gen-sitemap.mjs",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "test": "vitest run",
+    "check": "tsc -b && oxlint && vitest run && vite build && node scripts/gen-sitemap.mjs",
+    "preview": "vite preview",
+    "build:cv": "bash scripts/build-cv.sh",
+    "capture:renders": "bash scripts/capture-renders.sh"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.9",
@@ -35,6 +39,7 @@
     "postcss": "^8.4.0",
     "tailwindcss": "^3.4.0",
     "typescript": "~7.0.2",
-    "vite": "^8.3.6"
+    "vite": "^8.3.6",
+    "vitest": "^5.1.1"
   }
 }

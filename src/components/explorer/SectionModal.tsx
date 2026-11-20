@@ -54,7 +54,7 @@ export function SectionModal({ el }: { el?: StructuralElement }) {
             role="dialog"
             aria-modal="true"
             aria-labelledby="section-title"
-            className="relative grid max-h-[92vh] w-full max-w-6xl overflow-auto rounded-t-3xl border border-white/10 bg-ink-900 sm:rounded-3xl lg:grid-cols-[1.4fr_1fr]"
+            className="relative grid max-h-[92vh] w-full max-w-6xl overflow-auto rounded-t-3xl border border-white/10 bg-ink-900 sm:rounded-sm lg:grid-cols-[1.4fr_1fr]"
             initial={{ y: 40, opacity: 0, scale: 0.98 }}
             animate={{ y: 0, opacity: 1, scale: 1, transition: { duration: 0.55, ease } }}
             exit={{ y: 20, opacity: 0, transition: { duration: 0.2 } }}
@@ -68,7 +68,7 @@ export function SectionModal({ el }: { el?: StructuralElement }) {
               >
                 <SectionDrawing section={el.section} />
               </motion.div>
-              <p className="label absolute bottom-5 left-6">Dimensions in mm · not to scale</p>
+              <p className="label absolute bottom-5 left-6">Dimensions in mm · not to scale · typical values, not a project design</p>
             </div>
             <div className="flex flex-col gap-6 p-6 sm:p-10">
               <div className="flex items-start justify-between gap-4">

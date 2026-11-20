@@ -40,7 +40,7 @@ export function Footer({ home = false }: { home?: boolean }) {
                 {email}
               </a>
             ) : (
-              <Link to={lp('/contact')} className="link-draw text-[17px] text-bone">
+              <Link to={lp('/contact')} className="link-draw inline-flex min-h-[44px] items-center text-[17px] text-bone">
                 {t.nav.contact}
               </Link>
             )}

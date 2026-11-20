@@ -25,7 +25,8 @@ export default defineConfig({
         },
       },
     },
-    chunkSizeWarningLimit: 1000,
+    // the three.js chunk (~1.4 MB, ~460 kB gzip) only loads with the lazy 3D views
+    chunkSizeWarningLimit: 1500,
   },
   optimizeDeps: {
     include: ['three', 'framer-motion'],

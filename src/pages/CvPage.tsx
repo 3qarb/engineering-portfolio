@@ -87,8 +87,8 @@ function Sheet() {
               <div key={j.id} className="break-inside-avoid">
                 <div className="flex items-baseline justify-between gap-4">
                   <p className="text-[13.5px] font-semibold">{j.position}</p>
-                  <p className="shrink-0 font-mono text-[10.5px] text-[#5b564c]">
-                    {j.startDate} – {j.current ? t.common.present : j.endDate}
+                  <p className="shrink-0 text-[11px] text-[#5b564c]">
+                    <span className="font-mono">{j.startDate}</span> – {j.current ? t.common.present : j.endDate}
                   </p>
                 </div>
                 <p className="text-[#3d3a33]">

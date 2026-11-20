@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { CameraControls, PerformanceMonitor } from '@react-three/drei';
 import * as THREE from 'three';
 import type { BuildingSpec } from '../../lib/structure/types';
@@ -15,6 +15,13 @@ import { QUALITY, useQuality, prefersReducedMotion } from '../../lib/device';
 
 const SITE_VIEW: [number, number, number, number, number, number] = [86, 64, 98, -1, 4, 6];
 
+/** The site view, pulled back on portrait screens so every building stays in frame. */
+function siteView(aspect: number): [number, number, number, number, number, number] {
+  const k = THREE.MathUtils.clamp(1.15 / aspect, 1, 2.3);
+  const [px, py, pz, tx, ty, tz] = SITE_VIEW;
+  return [tx + (px - tx) * k, ty + (py - ty) * k, tz + (pz - tz) * k, tx, ty, tz];
+}
+
 function CameraRig({ buildings, locked }: { buildings: BuildingSpec[]; locked: boolean }) {
   const ref = useRef<CameraControls>(null);
   const buildingId = useExplorer((s) => s.buildingId);
@@ -22,6 +29,7 @@ function CameraRig({ buildings, locked }: { buildings: BuildingSpec[]; locked: b
   const elementId = useExplorer((s) => s.elementId);
   const lastTouch = useRef(0);
   const still = useRef(prefersReducedMotion());
+  const aspect = useThree((s) => s.size.width / Math.max(1, s.size.height));
 
   useEffect(() => {
     bridge.controls = ref.current;
@@ -35,7 +43,7 @@ function CameraRig({ buildings, locked }: { buildings: BuildingSpec[]; locked: b
     if (!c) return;
     const b = buildings.find((x) => x.id === buildingId);
     if (!b) {
-      void c.setLookAt(...SITE_VIEW, true);
+      void c.setLookAt(...siteView(aspect), true);
       return;
     }
     const { w, d, h } = buildingBounds(b);
@@ -49,7 +57,7 @@ function CameraRig({ buildings, locked }: { buildings: BuildingSpec[]; locked: b
     sphere.radius *= 1.02;
     void c.rotateTo(VIEWS.home[0], VIEWS.home[1], true);
     void c.fitToSphere(sphere, true);
-  }, [buildingId, exploded, buildings]);
+  }, [buildingId, exploded, buildings, aspect]);
 
   // zoom to the selected member, keeping the current angle
   useEffect(() => {
@@ -154,7 +162,7 @@ export function SiteScene({ buildings, locked = false, active = true }: { buildi
   return (
     <Canvas
       shadows
-      camera={{ position: [SITE_VIEW[0], SITE_VIEW[1], SITE_VIEW[2]], fov: 30, near: 0.5, far: 900 }}
+      camera={{ position: [SITE_VIEW[0], SITE_VIEW[1], SITE_VIEW[2]], fov: 30, near: 0.5, far: 1200 }}
       dpr={QUALITY[quality].dpr}
       frameloop={active ? 'always' : 'never'}
       gl={{ antialias, preserveDrawingBuffer: true, powerPreference: 'high-performance' }}

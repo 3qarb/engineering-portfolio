@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { Environment, Grid, Lightformer } from '@react-three/drei';
+import { useThree } from '@react-three/fiber';
 import { EffectComposer, N8AO, SMAA, ToneMapping, Vignette } from '@react-three/postprocessing';
 import { ToneMappingMode } from 'postprocessing';
 import * as THREE from 'three';
@@ -30,6 +31,9 @@ export function Stage({
 }) {
   const target = useMemo(() => new THREE.Object3D(), []);
   const q = QUALITY[useQuality((st) => st.quality)];
+  // portrait screens put the camera further back (see SiteScene.siteView); push the fog back with it
+  const aspect = useThree((st) => st.size.width / Math.max(1, st.size.height));
+  const fogK = THREE.MathUtils.clamp(1.15 / aspect, 1, 2.3);
   const t = THREE.MathUtils.clamp((sunHour - 6) / 12, 0, 1);
   const elev = THREE.MathUtils.degToRad(14 + 58 * Math.sin(Math.PI * t));
   const az = Math.PI * (0.08 + 0.84 * t); // east (+x) through south (+z) to west (−x)
@@ -46,7 +50,7 @@ export function Stage({
   return (
     <>
       <color attach="background" args={[background]} />
-      <fog attach="fog" args={[background, radius * 3.2, radius * 7]} />
+      <fog attach="fog" args={[background, radius * 3.2 * fogK, radius * 7 * fogK]} />
       <Environment resolution={256} frames={1} environmentIntensity={realistic ? 0.48 : 0.9}>
         <Lightformer form="rect" intensity={2.6} color="#fff3e2" position={[0, 9, 12]} scale={[34, 9, 1]} />
         <Lightformer form="rect" intensity={1.3} color="#dce6f0" position={[-14, 7, -6]} rotation-y={Math.PI / 2} scale={[24, 7, 1]} />
