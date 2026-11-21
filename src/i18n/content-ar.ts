@@ -88,7 +88,7 @@ export const softwareAr: Record<string, string> = {
 type ProjectText = Partial<
   Pick<
     ProjectEntry,
-    | 'title' | 'shortTitle' | 'category' | 'location' | 'period' | 'role' | 'summary' | 'overview' | 'engineeringContext'
+    | 'title' | 'shortTitle' | 'category' | 'location' | 'client' | 'period' | 'role' | 'summary' | 'overview' | 'engineeringContext'
     | 'existingConditions' | 'scope' | 'responsibilities' | 'challenges' | 'technical' | 'drawings'
   >
 >;
@@ -98,6 +98,7 @@ export const projectsAr: Record<string, ProjectText> = {
     title: 'فيلا سكنية — التصميم الإنشائي',
     shortTitle: 'فيلا سكنية',
     category: 'التحليل والتصميم الإنشائي',
+    client: 'عميل خاص',
     period: '2026',
     role: 'مهندس إنشائي: نموذج التحليل وتصميم الأساسات والمخططات الإنشائية',
     summary: 'فيلا من الخرسانة المسلحة، من نموذجي ETABS وSAFE إلى مجموعة مخططات إنشائية من 19 لوحة. التصميم المعماري لجهة أخرى.',

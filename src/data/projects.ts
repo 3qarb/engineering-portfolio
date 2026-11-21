@@ -58,7 +58,7 @@ export const projects: ProjectEntry[] = [
     shortTitle: 'Residential Villa',
     category: 'Structural analysis and design',
     location: '',
-    client: '',
+    client: 'Private client',
     period: '2026',
     status: 'completed',
     role: 'Structural engineer: analysis model, foundation design and structural drawings',
@@ -125,8 +125,7 @@ export const projects: ProjectEntry[] = [
     ],
     featured: true,
     pending: [
-      'Confirm the project type: client project, or a training / course project (the SAFE file was saved in a "Course 2" folder)',
-      'City and year, and whether the villa was built',
+      'City, and whether the villa has been built',
       'Permission to publish the drawing sheets (title blocks are blank)',
       'Resolve the model/drawing review items in docs/VILLA_REVIEW.md before sharing the drawings widely',
     ],

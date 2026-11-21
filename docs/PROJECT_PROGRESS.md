@@ -98,8 +98,8 @@ Not tested: real iOS Safari / Android hardware, screen readers (NVDA/VoiceOver),
    (condition → assessment → solution), a non-confidential drawing or calculation sheet,
    whether the client/consultant may be named, confirmation of software used.
 7. Confirm the five software entries reflect real use (AutoCAD, ETABS, SAP2000, SAFE, Revit).
-8. **Villa**: project type (client or course), city, year, built or not, permission to publish the sheets, and the
-   review items in docs/VILLA_REVIEW.md (which ETABS model is current; allowable bearing).
+8. **Villa** (confirmed client project, shown as "Private client"): city, built or not, permission to publish the
+   sheets, and the review items in docs/VILLA_REVIEW.md (which ETABS model is current; allowable bearing).
 9. Domain name for `VITE_SITE_URL`, and a form service URL for `VITE_CONTACT_ENDPOINT` (e.g. Formspree).
 
 ## 5. Remaining work / known issues
