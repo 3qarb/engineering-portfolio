@@ -3,7 +3,7 @@ import { Info, MousePointerClick, Move3d } from 'lucide-react';
 import { hasWebGL } from '../../lib/device';
 import type { BuildingSpec } from '../../lib/structure/types';
 import { buildings as builtIn } from '../../data/buildings';
-import { elementsFor, levelName } from '../../lib/structure/generate';
+import { elementsFor, elementLevel } from '../../lib/structure/generate';
 import { useAllBuildings, useAllProjects } from '../../store/projectsStore';
 import { useExplorer } from '../../store/explorerStore';
 import { ExplorerPanel } from './ExplorerPanel';
@@ -36,7 +36,7 @@ class SceneBoundary extends Component<{ children: ReactNode }, { failed: boolean
 
 /** Shown when the browser has no WebGL: the pre-rendered image; the panel keeps working. */
 function StaticFallback({ spec }: { spec?: BuildingSpec }) {
-  const shown = spec && builtIn.some((b) => b.id === spec.id) ? spec : builtIn[1];
+  const shown = spec && builtIn.some((b) => b.id === spec.id) ? spec : builtIn[0];
   return (
     <div className="relative h-full w-full">
       <img src={`/renders/${shown.id}.jpg`} alt={`Rendered 3D model: ${shown.name}`} className="h-full w-full object-cover" />
@@ -50,7 +50,7 @@ function StaticFallback({ spec }: { spec?: BuildingSpec }) {
 
 /** Tag on the canvas: these models use typical sizes unless the spec says otherwise. */
 function BasisTag({ spec }: { spec?: BuildingSpec }) {
-  if (spec?.basis === 'project') return null;
+  if (!spec || spec.basis === 'project') return null;
   return (
     <p className="label pointer-events-none flex items-center gap-1.5 text-bone-mute" title="Typical member sizes chosen to show the structural system. Not a project design.">
       <Info className="h-3 w-3" /> Illustrative model · typical sizes
@@ -120,7 +120,7 @@ function HoverReadout() {
         {el ? (
           <>
             <span className="h-1.5 w-1.5 rounded-full bg-sand" />
-            {el.label} · {levelName(el.level)}
+            {el.label} · {elementLevel(el)}
           </>
         ) : spec ? (
           <>
@@ -197,7 +197,7 @@ export function Explorer({ lockBuildingId, className }: { lockBuildingId?: strin
       <aside className="no-scrollbar border-t border-white/10 bg-ink-900 p-6 sm:p-8 lg:overflow-y-auto lg:border-l lg:border-t-0">
         <ExplorerPanel buildings={buildings} projects={projects} locked={!!lockBuildingId} />
       </aside>
-      <SectionModal el={el} />
+      <SectionModal el={el} project={spec?.basis === 'project'} />
     </div>
   );
 }

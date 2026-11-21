@@ -67,7 +67,7 @@ export function planSequence(spec: BuildingSpec, elements: StructuralElement[]):
     for (const ph of PHASES[spec.system]) {
       const ids = onLevel.filter(ph.match).map((e) => e.id);
       if (!ids.length) continue;
-      tasks.push({ id: `T-${L}-${ph.key}`, name: `${levelName(L)} · ${ph.label}`, start: t, finish: t + ph.days, elementIds: ids });
+      tasks.push({ id: `T-${L}-${ph.key}`, name: `${levelName(L, spec.levelNames)} · ${ph.label}`, start: t, finish: t + ph.days, elementIds: ids });
       t += ph.days;
     }
     t += LAG[spec.system];

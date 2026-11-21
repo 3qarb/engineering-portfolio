@@ -7,6 +7,7 @@ import { Seo } from '../components/Seo';
 import { useAllBuildings, useAllProjects, useProjectsStore } from '../store/projectsStore';
 import { useLocalePath, useLocalized, useT } from '../i18n';
 import { NotFound } from './NotFound';
+import { ModelDrawings } from '../components/drawings/ModelDrawings';
 
 const Explorer = lazy(() => import('../components/explorer/Explorer').then((m) => ({ default: m.Explorer })));
 
@@ -184,6 +185,15 @@ export function ProjectDetail() {
           <Suspense fallback={<div className="h-[68svh] min-h-[420px] border border-white/10 bg-ink-950" />}>
             <Explorer lockBuildingId={spec.id} className="border border-white/10 lg:h-[82vh] lg:min-h-[640px]" />
           </Suspense>
+        </section>
+      )}
+
+      {spec?.imported && (
+        <section className="wrap pb-20" aria-labelledby="drawings-title">
+          <h2 id="drawings-title" className="label mb-6">
+            <span className="text-sand">{t.detail.drawingsTitle}</span>
+          </h2>
+          <ModelDrawings spec={spec} labels={t.detail.drawingsTool} />
         </section>
       )}
 

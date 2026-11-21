@@ -1,11 +1,13 @@
 import type { BuildingSpec } from '../lib/structure/types';
+import { villa } from './models/villa';
 
 /**
  * The structures shown in the 3D explorer. Each one links to a project by slug.
- * Section sizes and reinforcement are typical of the work, in millimetres.
- * Edit them to match your drawings.
+ * The villa is an imported project model (basis 'project'); the others use typical sizes to
+ * illustrate a system (basis 'illustrative'), in millimetres.
  */
 export const buildings: BuildingSpec[] = [
+  villa,
   {
     id: 'bayt-al-balad',
     projectSlug: 'jeddah-historic-district-restoration',

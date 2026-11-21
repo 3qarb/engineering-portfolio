@@ -30,6 +30,11 @@ export function steelArea(section: Section): number {
     }
     case 'rc-footing':
       return (barArea(section.bottom.dia) * 1000) / section.bottom.spacing;
+    case 'ribbed-slab': {
+      // rib bars per metre of slab width, across the ribs
+      const perRib = section.ribBars.top.n * barArea(section.ribBars.top.dia) + section.ribBars.bottom.n * barArea(section.ribBars.bottom.dia);
+      return (perRib * 1000) / section.ribSpacing;
+    }
     default:
       return 0;
   }
@@ -97,6 +102,18 @@ export function sectionFacts(section: Section): SectionFact[] {
         { label: 'Concrete', value: section.concrete },
         { label: 'Steel grade', value: section.steel },
       ];
+    case 'ribbed-slab':
+      return [
+        { label: 'Overall depth', value: `${section.depth} mm` },
+        { label: 'Topping', value: `${section.topping} mm` },
+        { label: 'Ribs', value: `${section.ribWidth} wide @ ${section.ribSpacing} c/c` },
+        { label: 'Ribs run along', value: section.ribAxis === 'x' ? 'X (east–west)' : 'Y (north–south)' },
+        { label: 'Rib bars', value: `${section.ribBars.bottom.n} T${section.ribBars.bottom.dia} B · ${section.ribBars.top.n} T${section.ribBars.top.dia} T` },
+        { label: 'Rib links', value: `T${section.ribLinks.dia} @ ${section.ribLinks.spacing} mm` },
+        { label: 'Equivalent concrete', value: `${fmt(ribbedEquivalent(section))} mm` },
+        { label: 'Concrete', value: section.concrete },
+        { label: 'Steel grade', value: section.steel },
+      ];
     case 'masonry-wall':
       return [
         { label: 'Thickness', value: `${section.t} mm` },
@@ -127,6 +144,11 @@ export function sectionFacts(section: Section): SectionFact[] {
   }
 }
 
+/** Concrete per square metre of a hollow-block slab, as a solid thickness (mm): topping + ribs. */
+export function ribbedEquivalent(s: Extract<Section, { kind: 'ribbed-slab' }>): number {
+  return s.topping + ((s.depth - s.topping) * s.ribWidth) / s.ribSpacing;
+}
+
 /** Approximate concrete volume (m³) and reinforcement weight (kg) for one element. */
 export function quantities(el: StructuralElement): { concrete?: number; steel?: number } {
   const s = el.section;
@@ -136,6 +158,10 @@ export function quantities(el: StructuralElement): { concrete?: number; steel?: 
       concrete: x * y * z,
       steel: steelArea(s) * 1e-6 * el.length * STEEL_DENSITY,
     };
+  }
+  if (s.kind === 'ribbed-slab') {
+    const area = x * z;
+    return { concrete: area * ribbedEquivalent(s) * 1e-3, steel: steelArea(s) * 1e-6 * STEEL_DENSITY * area };
   }
   if (s.kind === 'rc-slab' || s.kind === 'rc-footing') {
     const area = x * z;

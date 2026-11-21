@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { X } from 'lucide-react';
-import { levelName } from '../../lib/structure/generate';
+import { elementLevel } from '../../lib/structure/generate';
 import { sectionFacts } from '../../lib/structure/sectionMath';
 import { KIND_LABEL, type StructuralElement } from '../../lib/structure/types';
 import { useExplorer } from '../../store/explorerStore';
@@ -13,6 +13,7 @@ const SECTION_NAME: Record<StructuralElement['section']['kind'], string> = {
   'rc-column': 'Column section',
   'rc-beam': 'Beam section',
   'rc-slab': 'Slab section, 1 m strip',
+  'ribbed-slab': 'Hollow-block slab section',
   'rc-footing': 'Footing section',
   'masonry-wall': 'Wall section',
   'timber-beam': 'Timber section',
@@ -20,7 +21,7 @@ const SECTION_NAME: Record<StructuralElement['section']['kind'], string> = {
   'steel-tube': 'Tube section',
 };
 
-export function SectionModal({ el }: { el?: StructuralElement }) {
+export function SectionModal({ el, project = false }: { el?: StructuralElement; project?: boolean }) {
   const open = useExplorer((s) => s.sectionOpen);
   const openSection = useExplorer((s) => s.openSection);
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -68,13 +69,15 @@ export function SectionModal({ el }: { el?: StructuralElement }) {
               >
                 <SectionDrawing section={el.section} />
               </motion.div>
-              <p className="label absolute bottom-5 left-6">Dimensions in mm · not to scale · typical values, not a project design</p>
+              <p className="label absolute bottom-5 left-6 right-6">
+                Dimensions in mm · not to scale · {project ? 'from the issued model and drawings' : 'typical values, not a project design'}
+              </p>
             </div>
             <div className="flex flex-col gap-6 p-6 sm:p-10">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="label mb-3 text-sand">
-                    {el.label.startsWith('Roshan') ? 'Roshan build-up' : SECTION_NAME[el.section.kind]} · {levelName(el.level)}
+                    {el.label.startsWith('Roshan') ? 'Roshan build-up' : SECTION_NAME[el.section.kind]} · {elementLevel(el)}
                   </p>
                   <h3 id="section-title" className="display h-md">
                     {el.label}
@@ -106,6 +109,7 @@ export function SectionModal({ el }: { el?: StructuralElement }) {
                   </motion.div>
                 ))}
               </dl>
+              {el.note && <p className="border-l-2 border-sand/60 pl-3 text-[13px] leading-snug text-bone-mute">{el.note}</p>}
             </div>
           </motion.div>
         </motion.div>

@@ -1,6 +1,6 @@
 # Project progress — engineering portfolio
 
-Last updated: 2026-11-20 · branch `feat/engineering-portfolio` (baseline commit `535a7ba`).
+Last updated: 2026-11-21 · branch `feat/villa-project` (previous work merged to `main` at `ca6a655`).
 
 ## 1. Current state
 
@@ -60,6 +60,17 @@ static defaults in `index.html` for non-JS link previews, `og.jpg`, JSON-LD `Per
 
 **Tests** — `tests/`: section maths, schedules and sequencing for all models, rebar cages, EN/AR parity, content guards.
 
+**Villa project (2026-11-21)** — first project on the site, built from the owner's own files:
+- `scripts/import-etabs.mjs` + `scripts/etabs/readers.mjs`: ETABS `.$et` geometry, Model Report PDF sections,
+  SAFE footings → `src/data/models/villa.json` (155 column segments, 218 beams, 67 slab panels, 35 footings, 10 straps).
+- `src/lib/structure/imported.ts` converts it; `src/data/models/villa.ts` adds reinforcement from S-203/205/207/211/212.
+- Explorer: real level names and elevations, hollow-block (ribbed) slab section type, hidden beams matched to HB1–HB5,
+  section modal shows member notes and the right basis.
+- Case study: framing plans per level and a movable building section drawn from the model
+  (`src/components/drawings/ModelDrawings.tsx`), five drawing sheets as figures, Arabic version.
+- Review of the files: **docs/VILLA_REVIEW.md** (model vs drawings, bearing pressure, loads, schedules).
+- Tests: `tests/villa.test.ts` pins counts, issued 200 mm sections, levels, orientation.
+
 ## 3. Verified in a browser (2026-11-20)
 
 | Check | Result |
@@ -87,7 +98,9 @@ Not tested: real iOS Safari / Android hardware, screen readers (NVDA/VoiceOver),
    (condition → assessment → solution), a non-confidential drawing or calculation sheet,
    whether the client/consultant may be named, confirmation of software used.
 7. Confirm the five software entries reflect real use (AutoCAD, ETABS, SAP2000, SAFE, Revit).
-8. Domain name for `VITE_SITE_URL`, and a form service URL for `VITE_CONTACT_ENDPOINT` (e.g. Formspree).
+8. **Villa**: project type (client or course), city, year, built or not, permission to publish the sheets, and the
+   review items in docs/VILLA_REVIEW.md (which ETABS model is current; allowable bearing).
+9. Domain name for `VITE_SITE_URL`, and a form service URL for `VITE_CONTACT_ENDPOINT` (e.g. Formspree).
 
 ## 5. Remaining work / known issues
 

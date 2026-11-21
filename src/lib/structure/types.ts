@@ -55,6 +55,23 @@ export type Section =
       concrete: string;
       steel: string;
     }
+  | {
+      /** Hollow-block (ribbed) slab: ribs between hollow blocks under a topping */
+      kind: 'ribbed-slab';
+      /** Overall depth and topping thickness */
+      depth: number;
+      topping: number;
+      ribWidth: number;
+      /** Rib centres */
+      ribSpacing: number;
+      /** Direction the ribs run in plan */
+      ribAxis: 'x' | 'z';
+      ribBars: { top: Bar; bottom: Bar };
+      ribLinks: { dia: number; spacing: number };
+      cover: number;
+      concrete: string;
+      steel: string;
+    }
   | { kind: 'masonry-wall'; t: number; material: string; mortar: string }
   | { kind: 'timber-beam'; b: number; h: number; species: string; grade: string }
   | { kind: 'layered'; layers: { name: string; t: number }[] }
@@ -72,6 +89,8 @@ export interface StructuralElement {
   position: [number, number, number];
   /** Box size along x, y, z, metres */
   size: [number, number, number];
+  /** Story name from an imported model (e.g. "G.F"); shown instead of the generic level name */
+  story?: string;
   /** Optional Euler rotation (radians) */
   rotation?: [number, number, number];
   /** Member length in metres, for quantities */
@@ -104,11 +123,25 @@ export interface BuildingSpec {
   /** Placement on the explorer site */
   site: { x: number; z: number };
   rc?: RcFrameSections;
+  /** Names of levels 0, 1, 2… when they have real names (imported models) */
+  levelNames?: string[];
+  /** A real analysis model converted by scripts/import-etabs.mjs; replaces the generated members */
+  imported?: ImportedBuilding;
   /**
    * Where the member sizes come from. 'illustrative' (the default) = typical values chosen to show
    * the system; 'project' = taken from issued project drawings, supplied by the owner.
    */
   basis?: 'illustrative' | 'project';
+}
+
+/** Members of an imported model, already converted, plus the facts the panels show. */
+export interface ImportedBuilding {
+  elements: StructuralElement[];
+  /** Plan extents and height above the lowest level, metres */
+  bounds: { w: number; d: number; h: number };
+  /** Level name → elevation, metres */
+  levels: { name: string; z: number }[];
+  source: string;
 }
 
 export const KIND_LABEL: Record<ElementKind, string> = {

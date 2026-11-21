@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { AnimatePresence, motion } from 'motion/react';
 import { ArrowLeft, ArrowUpRight, Layers, ScanLine } from 'lucide-react';
-import { buildingBounds, elementsFor, levelName } from '../../lib/structure/generate';
+import { buildingBounds, elementsFor, elementLevel } from '../../lib/structure/generate';
 import { quantities, sectionFacts, fmt } from '../../lib/structure/sectionMath';
 import { KIND_LABEL, SYSTEM_LABEL, type BuildingSpec, type ElementKind, type StructuralElement } from '../../lib/structure/types';
 import type { AnyProject } from '../../store/projectsStore';
@@ -39,6 +39,8 @@ function sectionTitle(el: StructuralElement) {
       return `${s.t} thick · T${s.bottom.dia}@${s.bottom.spacing}`;
     case 'rc-footing':
       return `${s.l}×${s.b}×${s.t}`;
+    case 'ribbed-slab':
+      return `${s.depth} hollow block · ribs @${s.ribSpacing}`;
     case 'masonry-wall':
       return `${s.t} coral stone`;
     case 'timber-beam':
@@ -62,7 +64,8 @@ function SiteList({ buildings, projects }: { buildings: BuildingSpec[]; projects
         <h2 className="display text-[clamp(34px,3.3vw,52px)] [overflow-wrap:anywhere]">Pick a building</h2>
         <p className="mt-4 text-[15px] leading-relaxed text-bone-dim">
           Each structure stands for a project or a technical study. Open one to see the work behind it, then take it apart
-          storey by storey and read any member's size and reinforcement. Member sizes are typical, chosen to show each system.
+          storey by storey and read any member's size and reinforcement. The villa is imported from its ETABS model; the
+          others use typical sizes to show a system.
         </p>
       </div>
       <ol className="flex flex-col">
@@ -139,11 +142,26 @@ function BuildingDetail({ spec, project, locked }: { spec: BuildingSpec; project
         {project?.client && <Row label="Client" value={project.client} />}
         {project?.location && <Row label="Location" value={project.location} />}
         {project?.period && <Row label="Period" value={project.period} />}
-        <Row label={spec.system === 'scaffold' ? 'Lifts' : 'Storeys'} value={String(spec.floors)} />
-        <Row label="Grid" value={`${spec.baysX.length} × ${spec.baysZ.length} bays`} />
+        {spec.imported ? (
+          <>
+            <Row label="Levels" value={spec.imported.levels.map((l) => l.name).join(' · ')} />
+            <Row label="Members" value={`${elements.filter((e) => e.kind === 'column').length} col · ${elements.filter((e) => e.kind === 'beam').length} beam · ${elements.filter((e) => e.kind === 'slab').length} slab`} />
+            <Row label="Source" value={spec.imported.source} />
+          </>
+        ) : (
+          <>
+            <Row label={spec.system === 'scaffold' ? 'Lifts' : 'Storeys'} value={String(spec.floors)} />
+            <Row label="Grid" value={`${spec.baysX.length} × ${spec.baysZ.length} bays`} />
+          </>
+        )}
         <Row label="Footprint" value={`${fmt(w, 1)} × ${fmt(d, 1)} m`} />
         <Row label="Height" value={`${fmt(h, 1)} m`} />
       </dl>
+      {spec.basis === 'project' && (
+        <p className="-mt-4 border-l-2 border-sand/60 pl-3 text-[13px] leading-snug text-bone-mute">
+          Members and sizes from the issued analysis model; reinforcement from the structural drawings. Architecture by others.
+        </p>
+      )}
       {spec.basis !== 'project' && (
         <p className="-mt-4 border-l-2 border-sand/60 pl-3 text-[13px] leading-snug text-bone-mute">
           Illustrative model: typical member sizes chosen to show the structural system, not values from a project drawing.
@@ -176,7 +194,7 @@ function BuildingDetail({ spec, project, locked }: { spec: BuildingSpec; project
           </button>
           {levels.map((l) => (
             <button key={l} type="button" className="chip" aria-pressed={isolateLevel === l} onClick={() => setIsolateLevel(isolateLevel === l ? null : l)}>
-              {l < 0 ? 'Fdn' : String(l + 1).padStart(2, '0')}
+              {l < 0 ? 'Fdn' : spec.levelNames?.[l] ?? String(l + 1).padStart(2, '0')}
             </button>
           ))}
         </div>
@@ -235,7 +253,7 @@ function ElementDetail({ el }: { el: StructuralElement }) {
       </button>
       <div>
         <p className="label mb-4 text-sand">
-          {KIND_LABEL[el.kind]} · {levelName(el.level)}
+          {KIND_LABEL[el.kind]} · {elementLevel(el)}
         </p>
         <h2 className="display text-[clamp(34px,3.3vw,52px)] [overflow-wrap:anywhere]">{el.label}</h2>
         {el.note && <p className="mt-3 text-[14px] text-bone-dim">{el.note}</p>}

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { Canvas, useFrame } from '@react-three/fiber';
 import { CameraControls, PerformanceMonitor } from '@react-three/drei';
 import * as THREE from 'three';
 import type { BuildingSpec } from '../../lib/structure/types';
@@ -15,11 +15,21 @@ import { QUALITY, useQuality, prefersReducedMotion } from '../../lib/device';
 
 const SITE_VIEW: [number, number, number, number, number, number] = [86, 64, 98, -1, 4, 6];
 
-/** The site view, pulled back on portrait screens so every building stays in frame. */
-function siteView(aspect: number): [number, number, number, number, number, number] {
-  const k = THREE.MathUtils.clamp(1.15 / aspect, 1, 2.3);
-  const [px, py, pz, tx, ty, tz] = SITE_VIEW;
-  return [tx + (px - tx) * k, ty + (py - ty) * k, tz + (pz - tz) * k, tx, ty, tz];
+// site view angles (camera-controls: azimuth from +Z, polar from +Y), from the original site camera
+const SITE_AZ = Math.atan2(SITE_VIEW[0] - SITE_VIEW[3], SITE_VIEW[2] - SITE_VIEW[5]);
+const SITE_POLAR = Math.acos((SITE_VIEW[1] - SITE_VIEW[4]) / Math.hypot(SITE_VIEW[0] - SITE_VIEW[3], SITE_VIEW[1] - SITE_VIEW[4], SITE_VIEW[2] - SITE_VIEW[5]));
+
+/** Every building on the site, as one sphere for fitting the camera (fits portrait screens too). */
+function siteSphere(buildings: BuildingSpec[]) {
+  const box = new THREE.Box3();
+  for (const s of buildings) {
+    const { w, d, h } = buildingBounds(s);
+    box.expandByPoint(new THREE.Vector3(s.site.x - w / 2, 0, s.site.z - d / 2));
+    box.expandByPoint(new THREE.Vector3(s.site.x + w / 2, h, s.site.z + d / 2));
+  }
+  const sphere = box.getBoundingSphere(new THREE.Sphere());
+  sphere.radius *= 1.02;
+  return sphere;
 }
 
 function CameraRig({ buildings, locked }: { buildings: BuildingSpec[]; locked: boolean }) {
@@ -29,7 +39,6 @@ function CameraRig({ buildings, locked }: { buildings: BuildingSpec[]; locked: b
   const elementId = useExplorer((s) => s.elementId);
   const lastTouch = useRef(0);
   const still = useRef(prefersReducedMotion());
-  const aspect = useThree((s) => s.size.width / Math.max(1, s.size.height));
 
   useEffect(() => {
     bridge.controls = ref.current;
@@ -43,7 +52,8 @@ function CameraRig({ buildings, locked }: { buildings: BuildingSpec[]; locked: b
     if (!c) return;
     const b = buildings.find((x) => x.id === buildingId);
     if (!b) {
-      void c.setLookAt(...siteView(aspect), true);
+      void c.rotateTo(SITE_AZ, SITE_POLAR, true);
+      void c.fitToSphere(siteSphere(buildings), true);
       return;
     }
     const { w, d, h } = buildingBounds(b);
@@ -57,7 +67,7 @@ function CameraRig({ buildings, locked }: { buildings: BuildingSpec[]; locked: b
     sphere.radius *= 1.02;
     void c.rotateTo(VIEWS.home[0], VIEWS.home[1], true);
     void c.fitToSphere(sphere, true);
-  }, [buildingId, exploded, buildings, aspect]);
+  }, [buildingId, exploded, buildings]);
 
   // zoom to the selected member, keeping the current angle
   useEffect(() => {
@@ -85,7 +95,7 @@ function CameraRig({ buildings, locked }: { buildings: BuildingSpec[]; locked: b
       ref={ref}
       makeDefault
       minDistance={4}
-      maxDistance={200}
+      maxDistance={320}
       maxPolarAngle={Math.PI * 0.495}
       smoothTime={0.6}
       onStart={() => {

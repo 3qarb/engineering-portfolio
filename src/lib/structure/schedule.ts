@@ -21,6 +21,8 @@ function mark(el: StructuralElement): string {
       return `t${s.t} T${s.bottom.dia}@${s.bottom.spacing}`;
     case 'rc-footing':
       return `${s.l}×${s.b}×${s.t}`;
+    case 'ribbed-slab':
+      return `t${s.depth} ribs ${s.ribWidth}@${s.ribSpacing}`;
     case 'masonry-wall':
       return `${s.t} stone`;
     case 'timber-beam':

@@ -62,6 +62,23 @@ After changing profile or experience, run `npm run build:cv` so the PDFs match.
 **Projects added in the site** (`/projects/new`) are stored in the visitor's browser only. To publish
 them, press **Export** on the Projects page and save the file as `public/data/projects.json`, then deploy.
 
+## Adding a real project model (ETABS / SAFE)
+
+A project's own analysis model can drive the 3D explorer and the plans/sections on its case study:
+
+```bash
+node scripts/import-etabs.mjs --et "path/model.$et" --report "path/Model Report.pdf" \
+  --safe "path/foundation.$sf" --out src/data/models/<id>.json
+```
+
+- `--et` (required): ETABS text export (`.$et` or `.e2k`) — joints, members, slabs, story levels.
+- `--report` (optional): the ETABS *Model Report* PDF; when given, member sections are taken from it
+  (what was issued). Needs the dev dependency `pdfjs-dist` (installed).
+- `--safe` (optional): SAFE text file — footings and strap beams.
+
+Then add a small module like `src/data/models/villa.ts` with the reinforcement from the drawings
+(column ties, beam and rib bars, covers), and add it to `src/data/buildings.ts` with `basis: 'project'`.
+
 ## Languages
 
 English lives at `/…`, Arabic at `/ar/…` (right-to-left, IBM Plex Sans Arabic). The 3D explorer's

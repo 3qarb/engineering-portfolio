@@ -73,11 +73,21 @@ export function Annotations({ spec, offsets }: { spec: BuildingSpec; offsets: Mu
     const d = c[c.length - 1];
     return c.map((z) => z - d / 2);
   }, [spec.baysZ]);
-  const x0 = xs[0];
-  const x1 = xs[xs.length - 1];
-  const z0 = zs[0];
-  const z1 = zs[zs.length - 1];
+  const imported = spec.imported;
+  const x0 = imported ? -imported.bounds.w / 2 : xs[0];
+  const x1 = imported ? imported.bounds.w / 2 : xs[xs.length - 1];
+  const z0 = imported ? -imported.bounds.d / 2 : zs[0];
+  const z1 = imported ? imported.bounds.d / 2 : zs[zs.length - 1];
   const reach = 2.4;
+  const sign = (v: number) => (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(2);
+  // level heads: real names and elevations for imported models, L01… otherwise
+  const heads$ = useMemo(
+    () =>
+      imported
+        ? imported.levels.slice(1).map((l, i) => ({ L: i, y: l.z, text: `${l.name}  ${sign(l.z)}` }))
+        : Array.from({ length: spec.floors }, (_, L) => ({ L, y: (L + 1) * spec.storeyHeight, text: `L${String(L + 1).padStart(2, '0')}  +${((L + 1) * spec.storeyHeight).toFixed(2)}` })),
+    [imported, spec.floors, spec.storeyHeight],
+  );
 
   const gridLines = useMemo(() => {
     const pts: number[] = [];
@@ -95,14 +105,15 @@ export function Annotations({ spec, offsets }: { spec: BuildingSpec; offsets: Mu
   const heads = useRef<(THREE.Group | null)[]>([]);
 
   useFrame(() => {
-    for (let L = 0; L < spec.floors; L++) {
-      const g = heads.current[L];
-      if (g) g.position.y = (L + 1) * spec.storeyHeight + (offsets.current.get(L) ?? 0);
+    for (const h of heads$) {
+      const g = heads.current[h.L];
+      if (g) g.position.y = h.y + (offsets.current.get(h.L) ?? 0);
     }
   });
 
   return (
     <group>
+      {!imported && (
       <lineSegments
         geometry={gridLines}
         material={lineMat}
@@ -110,19 +121,20 @@ export function Annotations({ spec, offsets }: { spec: BuildingSpec; offsets: Mu
         renderOrder={9}
         raycast={noRaycast}
       />
-      {xs.map((x, i) => (
+      )}
+      {!imported && xs.map((x, i) => (
         <Sprite key={`gx${i}`} text={LETTERS[i]} kind="bubble" position={[x, 0.05, z1 + reach]} scale={[1.3, 1.3]} />
       ))}
-      {zs.map((z, j) => (
+      {!imported && zs.map((z, j) => (
         <Sprite key={`gz${j}`} text={String(j + 1)} kind="bubble" position={[x1 + reach, 0.05, z]} scale={[1.3, 1.3]} />
       ))}
-      <Sprite text="Ground  ±0.00" kind="level" position={[x0 - 4.6, 0.45, z1 + 0.6]} scale={[7.4, 1.4]} />
-      {Array.from({ length: spec.floors }, (_, L) => (
-        <group key={L} ref={(g) => {
-            heads.current[L] = g;
+      {!imported && <Sprite text="Ground  ±0.00" kind="level" position={[x0 - 4.6, 0.45, z1 + 0.6]} scale={[7.4, 1.4]} />}
+      {heads$.map((h) => (
+        <group key={h.L} ref={(g) => {
+            heads.current[h.L] = g;
           }}>
           <Sprite
-            text={`L${String(L + 1).padStart(2, '0')}  +${((L + 1) * spec.storeyHeight).toFixed(2)}`}
+            text={h.text}
             kind="level"
             position={[x0 - 4.6, 0.45, z1 + 0.6]}
             scale={[7.4, 1.4]}

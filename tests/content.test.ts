@@ -63,7 +63,12 @@ describe('content accuracy guards', () => {
     const slugs = new Set(projects.map((p) => p.slug));
     for (const b of buildings) {
       expect(slugs.has(b.projectSlug), b.id).toBe(true);
-      expect(b.basis ?? 'illustrative').toBe('illustrative');
+      const project = projects.find((p) => p.slug === b.projectSlug)!;
+      // only an imported model of a real project may claim project basis
+      if (b.basis === 'project') {
+        expect(b.imported, b.id).toBeDefined();
+        expect(project.kind, b.id).toBe('project');
+      } else expect(project.kind === 'study' || b.id === 'bayt-al-balad', b.id).toBe(true);
     }
   });
 });

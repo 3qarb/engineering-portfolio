@@ -3,10 +3,14 @@ import type { BuildingSpec, RcFrameSections, StructuralElement } from './types';
 import { grid, letter } from './grid';
 import { heritage } from './heritage';
 import { scaffold } from './scaffold';
-export const levelName = (level: number) =>
-  level < 0 ? 'Foundation' : `Storey ${String(level + 1).padStart(2, '0')}`;
+export const levelName = (level: number, names?: string[]) =>
+  level < 0 ? 'Foundation' : names?.[level] ?? `Storey ${String(level + 1).padStart(2, '0')}`;
+
+/** The level a member belongs to, by its imported story name when it has one. */
+export const elementLevel = (el: StructuralElement) => el.story ?? levelName(el.level);
 
 export function buildingBounds(spec: BuildingSpec) {
+  if (spec.imported) return spec.imported.bounds;
   const w = spec.baysX.reduce((a, b) => a + b, 0);
   const d = spec.baysZ.reduce((a, b) => a + b, 0);
   const h = spec.floors * spec.storeyHeight;
@@ -120,6 +124,7 @@ function rcFrame(spec: BuildingSpec, rc: RcFrameSections): StructuralElement[] {
 }
 
 export function generateElements(spec: BuildingSpec): StructuralElement[] {
+  if (spec.imported) return spec.imported.elements;
   if (spec.system === 'heritage-masonry') return heritage(spec);
   if (spec.system === 'scaffold') return scaffold(spec);
   if (!spec.rc) return [];
@@ -129,6 +134,7 @@ export function generateElements(spec: BuildingSpec): StructuralElement[] {
 const cache = new Map<string, StructuralElement[]>();
 /** Memoised by spec identity + content so the scene and panels share one list. */
 export function elementsFor(spec: BuildingSpec): StructuralElement[] {
+  if (spec.imported) return spec.imported.elements;
   const key = JSON.stringify(spec);
   let hit = cache.get(key);
   if (!hit) {

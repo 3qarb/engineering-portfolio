@@ -264,6 +264,51 @@ export function SectionDrawing({ section }: { section: Section }) {
       }, 0.22);
     }
 
+    case 'ribbed-slab': {
+      const { depth, topping, ribWidth, ribSpacing, ribBars, ribLinks, cover } = section;
+      const W = ribSpacing * 2 + ribWidth;
+      return frame(W, depth, (ctx) => {
+        const ribs = [ribWidth / 2, ribWidth / 2 + ribSpacing, ribWidth / 2 + ribSpacing * 2];
+        const bar = (n: number, dia: number, x: number, y: number) =>
+          Array.from({ length: n }, (_, i) => (
+            <circle key={i} cx={n === 1 ? x : x - ribWidth / 2 + cover + ribLinks.dia + dia / 2 + ((ribWidth - 2 * (cover + ribLinks.dia) - dia) * i) / (n - 1)} cy={y} r={dia / 2} fill={C.steel} />
+          ));
+        const yb = depth - cover - ribLinks.dia - ribBars.bottom.dia / 2;
+        const yt = cover + ribLinks.dia + ribBars.top.dia / 2;
+        return (
+          <>
+            <Hatch id="hr" ctx={ctx} />
+            <rect width={W} height={topping} fill="url(#hr)" stroke={C.line} strokeWidth={sw(ctx, 2)} />
+            {ribs.map((x) => (
+              <rect key={x} x={x - ribWidth / 2} y={topping} width={ribWidth} height={depth - topping} fill="url(#hr)" stroke={C.line} strokeWidth={sw(ctx, 2)} />
+            ))}
+            {[0, 1].map((k) => (
+              <g key={k}>
+                <rect x={ribWidth + k * ribSpacing} y={topping} width={ribSpacing - ribWidth} height={depth - topping} fill="#15130f" stroke={C.mute} strokeWidth={sw(ctx, 1)} />
+                <line x1={ribWidth + k * ribSpacing} y1={topping} x2={ribSpacing + k * ribSpacing} y2={depth} stroke={C.mute} strokeWidth={sw(ctx, 0.8)} />
+                <line x1={ribSpacing + k * ribSpacing} y1={topping} x2={ribWidth + k * ribSpacing} y2={depth} stroke={C.mute} strokeWidth={sw(ctx, 0.8)} />
+              </g>
+            ))}
+            {ribs.map((x) => (
+              <g key={`s${x}`}>
+                <rect x={x - ribWidth / 2 + cover + ribLinks.dia / 2} y={cover + ribLinks.dia / 2} width={ribWidth - 2 * cover - ribLinks.dia} height={depth - 2 * cover - ribLinks.dia} fill="none" stroke={C.steel} strokeWidth={ribLinks.dia} />
+                {bar(ribBars.top.n, ribBars.top.dia, x, yt)}
+                {bar(ribBars.bottom.n, ribBars.bottom.dia, x, yb)}
+              </g>
+            ))}
+            <Dim ctx={ctx} x1={ribWidth / 2} y1={depth} x2={ribWidth / 2 + ribSpacing} y2={depth} off={ctx.u * 0.07} text={`${ribSpacing} c/c`} />
+            <Dim ctx={ctx} x1={W} y1={0} x2={W} y2={depth} off={ctx.u * 0.05} text={`${depth}`} vertical />
+            <Dim ctx={ctx} x1={0} y1={0} x2={0} y2={topping} off={-ctx.u * 0.06} text={`${topping}`} vertical />
+            <Callout ctx={ctx} x={ribs[0]} y={yb} tx={-ctx.u * 0.06} ty={depth + ctx.u * 0.12} text={`${ribBars.bottom.n} T${ribBars.bottom.dia} B · rib ${ribWidth}`} />
+            <Callout ctx={ctx} x={ribs[1]} y={yt} tx={ribs[1]} ty={-ctx.u * 0.06} text={`${ribBars.top.n} T${ribBars.top.dia} T · T${ribLinks.dia}@${ribLinks.spacing}`} />
+            <text x={ribWidth + ribSpacing / 2 - ribWidth / 2} y={(topping + depth) / 2} fill={C.mute} fontSize={fs(ctx) * 0.8} fontFamily="JetBrains Mono, monospace" textAnchor="middle" dominantBaseline="middle">
+              block
+            </text>
+          </>
+        );
+      }, 0.18);
+    }
+
     case 'rc-footing': {
       const { l, t, cover, bottom } = section;
       return frame(l, t, (ctx) => {
