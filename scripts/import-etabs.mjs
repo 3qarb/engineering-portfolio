@@ -2,7 +2,7 @@
 // Import a real ETABS (+ SAFE) model into the portfolio's 3D explorer format.
 //
 //   node scripts/import-etabs.mjs --et "<model.$et or .e2k>" [--report "<Model Report.pdf>"] \
-//        [--safe "<foundation.$sf>"] --out src/data/models/<id>.json
+//        [--safe "<foundation.$sf>"] [--source "label shown on the site"] --out src/data/models/<id>.json
 //
 // Geometry comes from the ETABS text file. When a Model Report PDF is given, member sections are
 // taken from it instead (the report is what was issued), keyed by story + object label.
@@ -103,7 +103,7 @@ const kpa = (v) => (et.units === 'MM' ? v * 1000 : v); // N/mm² → kPa; kN/m²
 const knm = (v) => (et.units === 'MM' ? v : v); // N/mm = kN/m
 const out = {
   meta: {
-    program: report?.program || `${et.program} ${et.version}`,
+    program: args.source || report?.program || `${et.program} ${et.version}`,
     reportDate: report?.date || null,
     sources: [args.et, args.report, args.safe].filter(Boolean).map((p) => basename(p)),
     sectionsFrom: report ? 'model report' : 'model file',

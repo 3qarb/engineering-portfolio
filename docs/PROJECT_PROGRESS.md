@@ -69,6 +69,8 @@ static defaults in `index.html` for non-JS link previews, `og.jpg`, JSON-LD `Per
 - Case study: framing plans per level and a movable building section drawn from the model
   (`src/components/drawings/ModelDrawings.tsx`), five drawing sheets as figures, Arabic version.
 - Review of the files: **docs/VILLA_REVIEW.md** (model vs drawings, bearing pressure, loads, schedules).
+- 2026-11-22: re-imported from the owner's master model (`VILLA_Master File - Try Modifieres.EDB`, opened as a
+  copy in ETABS 22.7 and exported to text); master analysed and designed on the copy (results in the review).
 - Tests: `tests/villa.test.ts` pins counts, issued 200 mm sections, levels, orientation.
 
 ## 3. Verified in a browser (2026-11-20)
@@ -99,7 +101,8 @@ Not tested: real iOS Safari / Android hardware, screen readers (NVDA/VoiceOver),
    whether the client/consultant may be named, confirmation of software used.
 7. Confirm the five software entries reflect real use (AutoCAD, ETABS, SAP2000, SAFE, Revit).
 8. **Villa** (confirmed client project, shown as "Private client"): city, built or not, permission to publish the
-   sheets, and the review items in docs/VILLA_REVIEW.md (which ETABS model is current; allowable bearing).
+   sheets, and the review items in docs/VILLA_REVIEW.md: R.F C16 fails (1.195), slenderness on 10 columns, beam
+   frame type (SDC D → special) and compatibility torsion, allowable bearing.
 9. Domain name for `VITE_SITE_URL`, and a form service URL for `VITE_CONTACT_ENDPOINT` (e.g. Formspree).
 
 ## 5. Remaining work / known issues

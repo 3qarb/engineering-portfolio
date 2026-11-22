@@ -4,8 +4,8 @@ import json from './villa.json';
 
 /**
  * Residential villa — the owner's structural design.
- * Geometry and member sizes: ETABS v20.3 model report (12 Sep 2026), imported by
- * scripts/import-etabs.mjs. Reinforcement the analysis model does not carry comes from the
+ * Geometry and member sizes: the ETABS master model (VILLA_Master File - Try Modifieres.EDB,
+ * ETABS v20.3, 27 Sep 2026), exported to text and imported by scripts/import-etabs.mjs. Reinforcement the analysis model does not carry comes from the
  * structural drawings: S-203 footings, S-205 columns, S-207 ground/strap beams, S-211 covers,
  * S-212 beams, hidden beams and ribs. Where a member's schedule type is not in the model, the
  * typical type is shown and the note says so.

@@ -96,7 +96,7 @@ export const projects: ProjectEntry[] = [
       'Hollow-block slabs 320 mm deep with 150 mm ribs at 550 mm, and hidden beams 400–1000 mm wide where spans or openings need them',
     ],
     technical: [
-      { label: 'Plan', value: 'About 29.8 × 29.8 m' },
+      { label: 'Plan grid', value: '29.8 × 30.0 m (S-202)' },
       { label: 'Levels (analysis model)', value: 'Base −1.50 · G.B +0.65 · G.F +4.70 · F.F +8.60 · R.F +12.00' },
       { label: 'Model', value: '155 column segments · 218 beams · 67 slab panels' },
       { label: 'Columns', value: '200 × 400 to 200 × 900 · 4T14 to 16T16' },
