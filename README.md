@@ -23,11 +23,11 @@ npm run dev -- --host  # also reachable from a phone on the same Wi-Fi (http://<
 
 | Command | What it does |
 |---|---|
-| `npm run check` | type-check, lint, unit tests, production build, sitemap — run before every commit |
+| `npm run check` | type-check, lint, unit tests, production build and page heads — run before every commit |
 | `npm test` | unit tests only (`tests/`) |
-| `npm run build` | production build into `dist/` (+ sitemap when `VITE_SITE_URL` is set) |
-| `npm run preview` | serve the production build |
-| `npm run build:cv` | regenerate `public/cv.pdf` and `public/cv-ar.pdf` from the CV page (dev server running) |
+| `npm run build` | production build into `dist/`, then `scripts/postbuild.mjs`: one HTML file per page and language with its own title, description and link preview, `robots.txt`, and `sitemap.xml` when the site address is known |
+| `npm run preview` | serve the production build at http://localhost:4173 with the same security headers as Vercel |
+| `npm run build:cv -- http://localhost:4173` | regenerate `public/cv.pdf` and `public/cv-ar.pdf` from the CV page (run `npm run build` and `npm run preview` first) |
 | `npm run capture:renders` | re-render the project images in `public/renders/` from the 3D models |
 | `bash scripts/capture-meta.sh` | regenerate `public/og.jpg` (link preview) and `public/apple-touch-icon.png` |
 
@@ -35,11 +35,12 @@ The three capture scripts need `playwright-cli` (`npm install -g @playwright/cli
 
 ## Environment variables (optional)
 
-Create `.env` (never commit it) or set them in the hosting dashboard:
+Copy `.env.example` to `.env.local` (git ignores it) or set them in Vercel. Both end up in the public
+browser bundle, so never put a secret in a `VITE_` variable.
 
 | Variable | Effect |
 |---|---|
-| `VITE_SITE_URL` | public address, e.g. `https://your-domain.com` — enables canonical and `hreflang` links, `og:url` and `dist/sitemap.xml` |
+| `VITE_SITE_URL` | public address, e.g. `https://your-domain.com`, for canonical and `hreflang` links, link previews and `sitemap.xml`. On Vercel it defaults to the project's production domain, so set it only once a custom domain is attached |
 | `VITE_CONTACT_ENDPOINT` | a form service URL that accepts JSON POSTs (e.g. Formspree). Without it the form opens the visitor's email app; if `profile.email` is still a placeholder the form says contact is not configured |
 
 ## Content
@@ -59,8 +60,13 @@ Everything shown comes from typed data files — edit these, not the components:
 A value containing `example.` (e.g. the email) is treated as a placeholder and hidden.
 After changing profile or experience, run `npm run build:cv` so the PDFs match.
 
-**Projects added in the site** (`/projects/new`) are stored in the visitor's browser only. To publish
-them, press **Export** on the Projects page and save the file as `public/data/projects.json`, then deploy.
+**Owner tools.** Adding, importing and exporting projects are hidden on the public site. Open any page
+with `?owner=1` once to show them in that browser (`?owner=0` hides them again); they are always shown
+in `npm run dev`. This is not a login: these tools only write to the browser's own storage.
+
+**Projects added in the site** (drop the ETABS/SAFE files at `/projects/import`, or fill the form at
+`/projects/new`) are stored in that browser only. To publish one, run `npm run dev`, add it, press
+**Publish to the site files** (writes `public/data/projects.json`), then commit and push.
 
 ## Adding a real project model (ETABS / SAFE)
 
@@ -84,15 +90,34 @@ Then add a small module like `src/data/models/villa.ts` with the reinforcement f
 English lives at `/…`, Arabic at `/ar/…` (right-to-left, IBM Plex Sans Arabic). The 3D explorer's
 engineering tools and the project editor stay in English inside Arabic pages.
 
-## Deploy
+## Deploy (GitHub + Vercel)
 
-Any static host works (Netlify, Vercel, Cloudflare Pages). Build command `npm run build`,
-output folder `dist`, and an SPA fallback so deep links load `index.html`:
+`vercel.json` holds the whole hosting setup: build command, clean URLs (`/about` serves `about.html`),
+redirects for old addresses, the app fallback for page routes (missing files return a real 404), caching,
+and the security headers (Content-Security-Policy, HSTS, frame, referrer and permissions policies).
 
-- Netlify: `public/_redirects` with `/*  /index.html  200`
-- Vercel: `vercel.json` with `{ "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }] }`
+**First deploy**
 
-Set `VITE_SITE_URL` (and `VITE_CONTACT_ENDPOINT` if used) in the host's environment settings.
+1. Create an empty **private** repository on GitHub (no README or licence), then push:
+   `git remote add origin https://github.com/<you>/<repo>.git` and `git push -u origin main`.
+2. In Vercel (free Hobby plan): **Add New → Project → Import** the repository. It reads `vercel.json`,
+   so leave the build settings as detected. Deploy.
+3. The site is live at `https://<project>.vercel.app`. Every push to `main` redeploys it; other
+   branches get preview links.
+
+**Custom domain (later)**
+
+1. Buy the domain from any registrar.
+2. Vercel → Project → **Settings → Domains → Add** the domain (and the `www` form). Vercel shows the DNS
+   records to create at the registrar (an `A` record for the bare domain, a `CNAME` for `www`).
+   HTTPS is issued automatically once DNS resolves.
+3. **Settings → Environment Variables**: `VITE_SITE_URL = https://your-domain.com` (Production), then
+   **Redeploy** so the links, previews and sitemap use the domain.
+4. Optionally add the sitemap (`https://your-domain.com/sitemap.xml`) in Google Search Console.
+
+**Changing the inline script in `index.html`** (the one that sets language and direction before the
+first paint): its SHA-256 hash is in the policy in `vercel.json`. `npm run build` stops and prints the
+new hash if they no longer match.
 
 ## Tests
 

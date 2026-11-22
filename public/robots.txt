@@ -4,3 +4,8 @@ Disallow: /render/
 Disallow: /cv/print
 Disallow: /ar/cv/print
 Disallow: /projects/new
+Disallow: /ar/projects/new
+Disallow: /projects/import
+Disallow: /ar/projects/import
+Disallow: /projects/*/edit
+Disallow: /ar/projects/*/edit

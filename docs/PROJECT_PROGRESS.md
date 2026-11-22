@@ -1,6 +1,6 @@
 # Project progress — engineering portfolio
 
-Last updated: 2026-11-21 · branch `feat/villa-project` (previous work merged to `main` at `ca6a655`).
+Last updated: 2026-11-22 · prepared for production on GitHub (private) + Vercel; see README § Deploy.
 
 ## 1. Current state
 
@@ -9,7 +9,8 @@ R3F stack. Everything that worked before was kept: the 3D explorer (instanced mo
 cages, section drawings, schedules + CSV, 4D sequence, section box, visual styles, view cube,
 PNG export), the project editor with browser storage, JSON import/export, and `/render/:id`.
 
-`npm run check` passes: TypeScript, oxlint (0 warnings), 29 unit tests, production build.
+`npm run check` passes: TypeScript, oxlint (0 warnings), 49 unit tests, production build, per-page heads.
+`npm audit`: 0 vulnerabilities (2026-11-22).
 
 ## 2. Completed
 
@@ -56,7 +57,17 @@ language switch in header and menu. The explorer tools and the editor stay Engli
 
 **SEO** — per-page title/description/OG/canonical/hreflang via `<Seo>` (React 19 head hoisting),
 static defaults in `index.html` for non-JS link previews, `og.jpg`, JSON-LD `Person`, `robots.txt`,
-`sitemap.xml` generated at build when `VITE_SITE_URL` is set, `site.webmanifest`, `_redirects`, `_headers`.
+`sitemap.xml`, `site.webmanifest`.
+
+**Production (2026-11-22)** — `scripts/postbuild.mjs` writes one HTML file per page and language
+(16 files) with its own title, description, canonical, hreflang and Open Graph tags, so link previews
+work without JavaScript; then `robots.txt` and `sitemap.xml`. Site address from `VITE_SITE_URL`, else
+Vercel's production domain (`config/site-url.ts`). `vercel.json`: clean URLs, old-address redirects,
+app fallback for page routes only, caching, CSP (inline language script allowed by hash, checked at
+build), HSTS, frame/referrer/permissions policies; `vite preview` sends the same headers.
+Chunking: the three.js chunk no longer loads on pages without 3D (React's scheduler had been pulled
+into it). No public source maps. Owner tools (add/import/export) hidden unless `?owner=1`.
+Public email set; CV PDFs regenerated from the production build.
 
 **Tests** — `tests/`: section maths, schedules and sequencing for all models, rebar cages, EN/AR parity, content guards.
 
@@ -91,7 +102,7 @@ Not tested: real iOS Safari / Android hardware, screen readers (NVDA/VoiceOver),
 
 ## 4. Content needed from the owner
 
-1. **Contact email** (and phone if wanted) → `src/data/profile.ts`, then `npm run build:cv`.
+1. **Phone**, if wanted → `src/data/profile.ts`, then `npm run build:cv`. (Email set: azooz.msf@gmail.com.)
 2. **LinkedIn URL** → `profile.links.linkedin`, set `verified: true`.
 3. **Education** (degree, university, year) and **professional registration** (e.g. Saudi Council of Engineers).
 4. **Languages** spoken.
@@ -103,14 +114,16 @@ Not tested: real iOS Safari / Android hardware, screen readers (NVDA/VoiceOver),
 8. **Villa** (confirmed client project, shown as "Private client"): city, built or not, permission to publish the
    sheets, and the review items in docs/VILLA_REVIEW.md: R.F C16 fails (1.195), slenderness on 10 columns, beam
    frame type (SDC D → special) and compatibility torsion, allowable bearing.
-9. Domain name for `VITE_SITE_URL`, and a form service URL for `VITE_CONTACT_ENDPOINT` (e.g. Formspree).
+9. Later: a custom domain (then `VITE_SITE_URL` in Vercel) and, optionally, a form service URL for
+   `VITE_CONTACT_ENDPOINT` (e.g. Formspree). Without it the contact form opens the visitor's email app.
 
 ## 5. Remaining work / known issues
 
 - Explorer panel, toolbar, schedule and the project editor are English-only (shown LTR inside Arabic pages).
-- No CSP header yet: the inline language script in `index.html` would need a hash, and Google Fonts must be allowed.
-- The site is a client-rendered SPA; Google renders it, but pre-rendering the main routes would help other crawlers.
-- `three` chunk is ~460 kB gzip; it loads lazily after the hero text, but it does load on the home page.
+- Page bodies are client-rendered; each page's head (title, description, preview) is static, which is what
+  link previews and the first crawl read. Full pre-rendering of the bodies would be the next step for SEO.
+- `three` chunk is ~460 kB gzip; it loads lazily with the home-page hero and the 3D pages only.
+- Unknown addresses return the app's "Page not found" with status 200 and `noindex` (SPA fallback).
 - View-cube top face is a thin target at the default angle (as in Revit); side faces and Home are full size.
 - Hidden in-app preview panes throttle WebGL, so 3D screenshots there take several seconds — not a site issue.
 
@@ -139,8 +152,9 @@ Not tested: real iOS Safari / Android hardware, screen readers (NVDA/VoiceOver),
 ## 8. Files
 
 New: `src/i18n/*`, `src/components/Seo.tsx`, `src/components/ui/Section.tsx`, `src/lib/device.ts`,
-`src/lib/site.ts`, `src/pages/CvPage.tsx`, `tests/*`, `scripts/build-cv.sh`, `scripts/gen-sitemap.mjs`,
-`scripts/capture-meta.sh`, `public/{cv-ar.pdf,og.jpg,apple-touch-icon.png,robots.txt,site.webmanifest,_redirects,_headers}`,
+`src/lib/site.ts`, `src/pages/CvPage.tsx`, `tests/*`, `scripts/build-cv.sh`, `scripts/postbuild.mjs`,
+`scripts/capture-meta.sh`, `public/{cv-ar.pdf,og.jpg,apple-touch-icon.png,robots.txt,site.webmanifest}`,
+`vercel.json`, `config/site-url.ts`, `.env.example`, `.gitattributes`, `src/lib/owner.ts`,
 `.claude/skills/engineering-portfolio-design/SKILL.md`, `docs/PROJECT_PROGRESS.md`.
 Rewritten: data files, all pages, Header, Footer, MainLayout, Hero, WorkList, README.
 Edited: explorer (Explorer, Panel, Toolbar, ViewCube, SectionModal), three (SiteScene, Stage, HeroStructure),
@@ -151,5 +165,6 @@ Edited: explorer (Explorer, Panel, Toolbar, ViewCube, SectionModal), three (Site
 1. Fill §4 items in `src/data/*`, run `npm run build:cv`, then `npm run check`.
 2. Add Al-Balad photographs as `gallery` figures and, if cleared, a sample drawing.
 3. Translate the explorer panel and toolbar strings into `src/i18n`.
-4. Choose a host, set `VITE_SITE_URL`, deploy `dist/`, submit `sitemap.xml` in Search Console.
+4. Push to a private GitHub repository and import it in Vercel (README § Deploy); later attach a domain,
+   set `VITE_SITE_URL`, redeploy, submit `sitemap.xml` in Search Console.
 5. Test on a real iPhone and Android phone (3D quality tier, touch orbit, RTL).

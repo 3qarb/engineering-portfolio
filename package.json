@@ -5,11 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build && node scripts/gen-sitemap.mjs",
+    "build": "tsc -b && vite build && node scripts/postbuild.mjs",
     "lint": "oxlint",
     "test": "vitest run",
-    "check": "tsc -b && oxlint && vitest run && vite build && node scripts/gen-sitemap.mjs",
-    "preview": "vite preview",
+    "check": "tsc -b && oxlint && vitest run && vite build && node scripts/postbuild.mjs",
+    "preview": "vite preview --strictPort",
     "build:cv": "bash scripts/build-cv.sh",
     "capture:renders": "bash scripts/capture-renders.sh"
   },

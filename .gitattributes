@@ -1,0 +1,3 @@
+# index.html: its inline script is allowed by a hash in vercel.json, so its bytes must not change on checkout
+index.html text eol=lf
+*.sh text eol=lf

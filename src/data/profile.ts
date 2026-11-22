@@ -13,7 +13,7 @@ export const profile = {
   introduction:
     'A civil engineer working in technical office and structural engineering, with a focus on existing and historic buildings.',
   location: 'Jeddah, Saudi Arabia',
-  email: 'abdulaziz.kanaan@example.com',
+  email: 'azooz.msf@gmail.com',
   phone: '',
   /** Set `verified: true` once the address is confirmed; unverified links are not shown. */
   links: {
@@ -43,7 +43,7 @@ export const profile = {
     ],
   },
   /** Content still to be supplied by the owner (shown only in development). */
-  pending: ['Education (degree, university, year)', 'Professional registration (e.g. Saudi Council of Engineers)', 'Languages', 'Contact email and phone', 'LinkedIn address'],
+  pending: ['Education (degree, university, year)', 'Professional registration (e.g. Saudi Council of Engineers)', 'Languages', 'Phone (optional)', 'LinkedIn address'],
 };
 
 export type Profile = typeof profile;

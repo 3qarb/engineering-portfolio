@@ -1,14 +1,15 @@
 import { Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { Seo } from '../components/Seo';
-import { useLocalePath, useT } from '../i18n';
+import { useLang, useLocalePath, useT } from '../i18n';
 
 export function NotFound() {
   const t = useT();
   const lp = useLocalePath();
+  const name = useLang() === 'ar' ? 'عبدالعزيز كنعان' : 'Abdulaziz Kanaan';
   return (
     <section className="wrap flex min-h-[80svh] flex-col justify-end pb-20 pt-[calc(var(--header-h)+48px)]">
-      <Seo title={`${t.notFound.title} — Abdulaziz Kanaan`} description={t.notFound.body} noindex />
+      <Seo title={`${t.notFound.title} — ${name}`} description={t.notFound.body} noindex />
       <p className="label mb-6 text-sand" lang="en">
         Error 404
       </p>

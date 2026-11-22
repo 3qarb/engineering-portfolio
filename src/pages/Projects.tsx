@@ -1,12 +1,14 @@
 import { useDeferredValue, useMemo, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { Download, Plus, Search, Upload, X } from 'lucide-react';
+import { Boxes, Download, Plus, Search, Upload, X } from 'lucide-react';
 import { LineReveal } from '../components/ui/Motion';
 import { ProjectImage } from '../components/ui/ProjectImage';
 import { Seo } from '../components/Seo';
 import { exportProjects, useAllBuildings, useAllProjects, useProjectsStore, type AnyProject, type UserProject } from '../store/projectsStore';
 import { useLocalePath, useLocalized, useT } from '../i18n';
+import { useTools } from '../i18n/tools';
+import { isOwner } from '../lib/owner';
 
 const norm = (s: string) => s.toLowerCase().normalize('NFKD').replace(/[̀-ًͯ-ٟ]/g, '');
 
@@ -68,6 +70,10 @@ function Card({ p, i, wide = false }: { p: AnyProject; i: number; wide?: boolean
 
 export function Projects() {
   const t = useT();
+  const lp = useLocalePath();
+  const fromModel = useTools().importer.fromModel;
+  // add / import / export are owner tools, hidden on the public site (see lib/owner.ts)
+  const [owner] = useState(isOwner);
   const projects = useLocalized(useAllProjects());
   const userProjects = useProjectsStore((s) => s.userProjects);
   const importMany = useProjectsStore((s) => s.importMany);
@@ -123,9 +129,13 @@ export function Projects() {
                 onChange={(e) => setQuery(e.target.value)}
               />
             </label>
+            {owner && (
             <div className="flex flex-wrap gap-3">
-              <Link to="/projects/new" className="btn-solid">
+              <Link to={lp('/projects/new')} className="btn-solid">
                 <Plus className="h-4 w-4" /> {t.projects.add}
+              </Link>
+              <Link to={lp('/projects/import')} className="btn-ghost">
+                <Boxes className="h-4 w-4" /> {fromModel}
               </Link>
               <button type="button" className="btn-ghost" onClick={() => fileRef.current?.click()}>
                 <Upload className="h-4 w-4" /> {t.projects.import}
@@ -145,6 +155,7 @@ export function Projects() {
                 onChange={(e) => void onImport(e.target.files?.[0])}
               />
             </div>
+            )}
           </div>
           <div className="flex flex-wrap items-center gap-2" role="group" aria-label={t.projects.filter}>
             <button type="button" className="chip" aria-pressed={!filter} onClick={() => setFilter('')}>

@@ -5,7 +5,7 @@ import { FadeUp, LineReveal } from '../components/ui/Motion';
 import { Pending, RuleList } from '../components/ui/Section';
 import { Seo } from '../components/Seo';
 import { useAllBuildings, useAllProjects, useProjectsStore } from '../store/projectsStore';
-import { useLocalePath, useLocalized, useT } from '../i18n';
+import { useLang, useLocalePath, useLocalized, useT } from '../i18n';
 import { NotFound } from './NotFound';
 import { ModelDrawings } from '../components/drawings/ModelDrawings';
 
@@ -26,6 +26,7 @@ export function ProjectDetail() {
   const { slug } = useParams();
   const navigate = useNavigate();
   const t = useT();
+  const owner = useLang() === 'ar' ? 'عبدالعزيز كنعان' : 'Abdulaziz Kanaan';
   const lp = useLocalePath();
   const projects = useLocalized(useAllProjects());
   const buildings = useAllBuildings();
@@ -123,7 +124,7 @@ export function ProjectDetail() {
 
   return (
     <>
-      <Seo title={`${p.title} — Abdulaziz Kanaan`} description={p.summary || p.overview.slice(0, 155)} type="article" image={p.cover?.startsWith('/') ? p.cover : undefined} />
+      <Seo title={`${p.title} — ${owner}`} description={p.summary || p.overview.slice(0, 155)} type="article" image={p.cover?.startsWith('/') ? p.cover : undefined} />
       <section className="wrap pb-14 pt-[calc(var(--header-h)+56px)] sm:pt-[calc(var(--header-h)+88px)]">
         <div className="mb-10 flex flex-wrap items-center justify-between gap-4">
           <Link to={lp('/projects')} className="label inline-flex min-h-[44px] items-center gap-2 hover:text-bone">

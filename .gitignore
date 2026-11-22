@@ -29,3 +29,12 @@ dist-ssr
 # local tooling
 .claude-flow
 .agents
+
+# environment files (keep the example)
+.env
+.env.*
+!.env.example
+
+# personal Claude Code settings
+.claude/settings.local.json
+.vercel
