@@ -1,6 +1,6 @@
 /** All section dimensions are in millimetres; positions and sizes in metres. */
 
-export type ElementKind = 'column' | 'beam' | 'slab' | 'footing' | 'wall' | 'tube';
+export type ElementKind = 'column' | 'beam' | 'slab' | 'footing' | 'wall' | 'stair' | 'ramp' | 'tube';
 
 export interface Bar {
   n: number;
@@ -24,6 +24,8 @@ export type Section =
       steel: string;
       /** Original core when the column was jacketed */
       jacketFrom?: { b: number; h: number };
+      /** 'circle': b is the diameter and the ties are a spiral at ties.spacing pitch */
+      shape?: 'rect' | 'circle';
     }
   | {
       kind: 'rc-beam';
@@ -42,6 +44,8 @@ export type Section =
       cover: number;
       bottom: Mesh;
       top?: Mesh;
+      /** Flat slab: drop panel below the slab at the column, square in plan */
+      drop?: { t: number; size: number };
       concrete: string;
       steel: string;
     }
@@ -52,6 +56,8 @@ export type Section =
       t: number;
       cover: number;
       bottom: Mesh;
+      /** Rafts and deep footings carry a top mesh too */
+      top?: Mesh;
       concrete: string;
       steel: string;
     }
@@ -64,11 +70,52 @@ export type Section =
       ribWidth: number;
       /** Rib centres */
       ribSpacing: number;
-      /** Direction the ribs run in plan */
-      ribAxis: 'x' | 'z';
+      /** Direction the ribs run in plan; 'both' = two-way ribs (waffle slab) */
+      ribAxis: 'x' | 'z' | 'both';
       ribBars: { top: Bar; bottom: Bar };
       ribLinks: { dia: number; spacing: number };
+      /** What fills the space between ribs: permanent hollow blocks, or removable void formers */
+      filler?: 'block' | 'void';
+      /** Shrinkage mesh in the topping */
+      toppingMesh?: Mesh;
       cover: number;
+      concrete: string;
+      steel: string;
+    }
+  | {
+      /** Reinforced-concrete wall: bars both ways, in one or two layers */
+      kind: 'rc-wall';
+      t: number;
+      cover: number;
+      vertical: Mesh;
+      horizontal: Mesh;
+      layers: 1 | 2;
+      concrete: string;
+      steel: string;
+    }
+  | {
+      /** Stair flight: waist slab with steps cast on it. Element size = [run, rise, width] */
+      kind: 'stair';
+      waist: number;
+      riser: number;
+      tread: number;
+      steps: number;
+      width: number;
+      cover: number;
+      main: Mesh;
+      distribution: Mesh;
+      concrete: string;
+      steel: string;
+    }
+  | {
+      /** Inclined slab. Element size = [sloped length, t, width], pitched by its rotation */
+      kind: 'ramp';
+      t: number;
+      /** Slope in percent */
+      slope: number;
+      cover: number;
+      bottom: Mesh;
+      top?: Mesh;
       concrete: string;
       steel: string;
     }
@@ -91,6 +138,8 @@ export interface StructuralElement {
   size: [number, number, number];
   /** Story name from an imported model (e.g. "G.F"); shown instead of the generic level name */
   story?: string;
+  /** Entry in the element library (src/data/elements) this member is an instance of */
+  typeId?: string;
   /** Optional Euler rotation (radians) */
   rotation?: [number, number, number];
   /** Member length in metres, for quantities */
@@ -150,6 +199,8 @@ export const KIND_LABEL: Record<ElementKind, string> = {
   slab: 'Slab',
   footing: 'Footing',
   wall: 'Wall',
+  stair: 'Stair',
+  ramp: 'Ramp',
   tube: 'Scaffold tube',
 };
 

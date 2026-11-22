@@ -31,6 +31,7 @@ export function Schedule({ spec }: { spec: BuildingSpec }) {
               <th className="px-3 py-2 font-normal">Type · mark</th>
               <th className="px-2 py-2 text-right font-normal">No.</th>
               {hasConcrete && <th className="px-2 py-2 text-right font-normal">m³</th>}
+              {hasConcrete && <th className="px-2 py-2 text-right font-normal" title="Formwork">m²</th>}
               {hasConcrete && <th className="px-3 py-2 text-right font-normal">kg</th>}
             </tr>
           </thead>
@@ -42,6 +43,7 @@ export function Schedule({ spec }: { spec: BuildingSpec }) {
                 </td>
                 <td className="px-2 py-2 text-right">{r.count}</td>
                 {hasConcrete && <td className="px-2 py-2 text-right">{r.concrete ? fmt(r.concrete, 1) : '—'}</td>}
+                {hasConcrete && <td className="px-2 py-2 text-right">{r.formwork ? fmt(r.formwork) : '—'}</td>}
                 {hasConcrete && <td className="px-3 py-2 text-right">{r.steel ? fmt(r.steel) : '—'}</td>}
               </tr>
             ))}
@@ -49,6 +51,7 @@ export function Schedule({ spec }: { spec: BuildingSpec }) {
               <td className="px-3 py-2">Total</td>
               <td className="px-2 py-2 text-right">{total.count}</td>
               {hasConcrete && <td className="px-2 py-2 text-right">{fmt(total.concrete, 1)}</td>}
+              {hasConcrete && <td className="px-2 py-2 text-right">{fmt(total.formwork)}</td>}
               {hasConcrete && <td className="px-3 py-2 text-right">{fmt(total.steel / 1000, 1)} t</td>}
             </tr>
           </tbody>

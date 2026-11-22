@@ -37,7 +37,7 @@ const detailing: Detailing = {
     b,
     h,
     cover: 25, // S-211 note 25
-    bars,
+    bars: bars!, // villa section names always carry the bars
     ties: { dia: 10, spacing: COLUMN_TIES[h]?.spacing ?? 167 },
     concrete: CONCRETE,
     steel: STEEL,

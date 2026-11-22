@@ -52,7 +52,6 @@ describe('content accuracy guards', () => {
   it('dates the IKK role from 2025', () => {
     expect(profile.currentCompany.startDate).toBe('2025');
     expect(experience.find((e) => e.id === 'ikk-group')?.startDate).toBe('2025');
-    expect(projects.find((p) => p.id === 'al-balad-restoration')?.period).toMatch(/^2025/);
   });
   it('contains no template placeholders', () => {
     const text = JSON.stringify({ profile, experience, projects, expertise, software });
@@ -68,7 +67,7 @@ describe('content accuracy guards', () => {
       if (b.basis === 'project') {
         expect(b.imported, b.id).toBeDefined();
         expect(project.kind, b.id).toBe('project');
-      } else expect(project.kind === 'study' || b.id === 'bayt-al-balad', b.id).toBe(true);
+      } else expect(project.kind, b.id).toBe('study');
     }
   });
 });

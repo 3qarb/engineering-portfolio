@@ -4,6 +4,8 @@ import { persist } from 'zustand/middleware';
 import { projects as builtInProjects, type ProjectEntry } from '../data/projects';
 import { buildings as builtInBuildings } from '../data/buildings';
 import type { BuildingSpec } from '../lib/structure/types';
+import type { ImportedModelJson } from '../lib/structure/imported';
+import { specFromModel } from '../lib/import/pipeline';
 
 /** A project added from the site's editor. */
 export interface UserProject extends ProjectEntry {
@@ -11,6 +13,8 @@ export interface UserProject extends ProjectEntry {
   building?: BuildingSpec;
   /** JPEG snapshot of the 3D model, made in the editor */
   render?: string;
+  /** A real analysis model added from the Add-project page (compact JSON; rebuilt into members on load) */
+  model?: ImportedModelJson;
   createdAt: string;
 }
 
@@ -92,7 +96,7 @@ export const useProjectsStore = create<ProjectsState>()(
   ),
 );
 
-export type AnyProject = ProjectEntry & Partial<Pick<UserProject, 'userCreated' | 'building' | 'createdAt' | 'render'>>;
+export type AnyProject = ProjectEntry & Partial<Pick<UserProject, 'userCreated' | 'building' | 'createdAt' | 'render' | 'model'>>;
 
 /** Built-in, published and browser-saved projects, newest additions first. */
 export function useAllProjects(): AnyProject[] {
@@ -110,6 +114,17 @@ export function useAllProjects(): AnyProject[] {
   }, [user, published]);
 }
 
+const built = new WeakMap<ImportedModelJson, BuildingSpec>();
+/** Imported models are rebuilt into members once per model object. */
+function fromModel(model: ImportedModelJson, id: string, slug: string, name: string): BuildingSpec {
+  let spec = built.get(model);
+  if (!spec) {
+    spec = specFromModel(model, id, slug, name);
+    built.set(model, spec);
+  }
+  return spec;
+}
+
 /** Lay out added buildings in rows behind the built-in site. */
 function placeAdded(spec: BuildingSpec, i: number): BuildingSpec {
   return { ...spec, site: { x: -22 + (i % 3) * 24, z: 40 + Math.floor(i / 3) * 26 } };
@@ -119,8 +134,12 @@ export function useAllBuildings(): BuildingSpec[] {
   const all = useAllProjects();
   return useMemo(() => {
     const added = all
-      .filter((p) => p.userCreated && p.building)
-      .map((p, i) => placeAdded({ ...p.building!, projectSlug: p.slug, id: `b-${p.slug}` }, i));
+      .filter((p) => p.userCreated && (p.building || p.model))
+      .map((p, i) => {
+        const id = `b-${p.slug}`;
+        const spec = p.model ? fromModel(p.model, id, p.slug, p.shortTitle || p.title) : { ...p.building!, projectSlug: p.slug, id };
+        return placeAdded(spec, i);
+      });
     return [...builtInBuildings, ...added];
   }, [all]);
 }

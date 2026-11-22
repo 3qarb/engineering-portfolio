@@ -35,7 +35,7 @@ export function Index() {
   const expertise = useExpertise();
   const software = useSoftware();
   const role = useExperience().find((e) => e.current);
-  const office = buildings.find((b) => b.id === 'rc-office-block')!;
+  const office = buildings.find((b) => b.id === 'villa')!;
 
   return (
     <>
@@ -177,7 +177,7 @@ export function Index() {
           >
             <img
               src={`/renders/${office.id}.jpg`}
-              alt="Rendered 3D model of an eight-storey reinforced concrete frame"
+              alt="Rendered 3D model of the villa reinforced concrete frame"
               loading="lazy"
               decoding="async"
               width={1600}

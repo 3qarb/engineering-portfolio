@@ -1,9 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { barArea, quantities, sectionFacts, steelArea } from '../src/lib/structure/sectionMath';
-import { buildings } from '../src/data/buildings';
 import { elementsFor } from '../src/lib/structure/generate';
+import { office, scaffold } from './fixtures';
 
-const office = buildings.find((b) => b.id === 'rc-office-block')!;
 const fact = (facts: { label: string; value: string }[], label: string) => facts.find((f) => f.label === label)?.value;
 
 describe('bar areas', () => {
@@ -38,16 +37,21 @@ describe('rc slab mesh', () => {
 });
 
 describe('quantities', () => {
-  it('column steel weight = As · L · 7850', () => {
+  it('column steel weight = main bars As · L · 7850 + closed ties', () => {
     const el = elementsFor(office).find((e) => e.kind === 'column')!;
     const q = quantities(el);
     const s = el.section;
     if (s.kind !== 'rc-column') throw new Error('expected a column');
-    expect(q.steel).toBeCloseTo(steelArea(s) * 1e-6 * el.length * 7850, 6);
+    const main = steelArea(s) * 1e-6 * el.length * 7850;
+    const b = s.b / 1000;
+    const h = s.h / 1000;
+    const c = s.cover / 1000;
+    const ties = (Math.floor(el.length / (s.ties.spacing / 1000)) + 1) * 2 * (b + h - 4 * c) * barArea(s.ties.dia) * 1e-6 * 7850;
+    expect(q.steel).toBeCloseTo(main + ties, 6);
     expect(q.concrete).toBeCloseTo(el.size[0] * el.size[1] * el.size[2], 9);
+    expect(q.formwork).toBeCloseTo(2 * (b + h) * el.length, 9);
   });
   it('returns nothing for members without concrete', () => {
-    const scaffold = buildings.find((b) => b.system === 'scaffold')!;
     const tube = elementsFor(scaffold).find((e) => e.kind === 'tube')!;
     expect(quantities(tube)).toEqual({});
   });

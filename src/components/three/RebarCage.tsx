@@ -32,7 +32,10 @@ export function RebarCage({ el }: { el: StructuralElement }) {
   const bars = useRef<THREE.InstancedMesh>(null);
   const loops = useRef<THREE.InstancedMesh>(null);
   const loop0 = cage?.loops[0];
-  const loopGeo = useMemo(() => (loop0 ? loopGeometry(loop0.w, loop0.h, loop0.dia) : null), [loop0]);
+  const loopGeo = useMemo(
+    () => (loop0 ? (loop0.round ? new THREE.TorusGeometry(loop0.w / 2, loop0.dia / 2, 6, 40) : loopGeometry(loop0.w, loop0.h, loop0.dia)) : null),
+    [loop0],
+  );
 
   useLayoutEffect(() => {
     if (!cage) return;

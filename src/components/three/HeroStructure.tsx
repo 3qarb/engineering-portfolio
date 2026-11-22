@@ -7,19 +7,19 @@ import { StructureModel, type HeroMotion } from './StructureModel';
 import { Stage } from './Stage';
 import { QUALITY, useQuality, prefersReducedMotion } from '../../lib/device';
 
-const HOUSE = { ...buildings.find((b) => b.id === 'bayt-al-balad')!, site: { x: 0, z: 0 } };
+const HOUSE = { ...buildings.find((b) => b.id === 'villa')!, site: { x: 0, z: 0 } };
 
-function fitOrtho(cam: THREE.OrthographicCamera, w: number, h: number, height: number) {
-  cam.zoom = Math.min(h / (height * 1.55), w / (height * 1.25));
+function fitOrtho(cam: THREE.OrthographicCamera, w: number, h: number, height: number, span = height) {
+  cam.zoom = Math.min(h / (Math.max(height, span * 0.7) * 1.55), w / (Math.max(height, span) * 1.25));
   cam.lookAt(0, height * 0.5, 0);
   cam.updateProjectionMatrix();
 }
 
 /** Keeps the axonometric framed as the canvas resizes. */
-function FitOrtho({ height }: { height: number }) {
+function FitOrtho({ height, span }: { height: number; span: number }) {
   const camera = useThree((s) => s.camera);
   const size = useThree((s) => s.size);
-  useEffect(() => fitOrtho(camera as THREE.OrthographicCamera, size.width, size.height, height), [camera, size, height]);
+  useEffect(() => fitOrtho(camera as THREE.OrthographicCamera, size.width, size.height, height, span), [camera, size, height, span]);
   return null;
 }
 
@@ -44,13 +44,13 @@ function Turntable({ children, still }: { children: React.ReactNode; still: bool
   return <group ref={g}>{children}</group>;
 }
 
-/** Realistic exploded axonometric of the Al-Balad house: storeys assemble, then breathe apart. */
+/** Realistic exploded axonometric of the villa: storeys assemble, then breathe apart. */
 export default function HeroStructure() {
   const wrap = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(true);
   const still = useMemo(() => prefersReducedMotion(), []);
   const quality = useQuality((s) => s.quality);
-  const { h } = buildingBounds(HOUSE);
+  const { w, d, h } = buildingBounds(HOUSE);
   const total = h + HOUSE.floors * 1.9;
 
   const motion = useMemo<HeroMotion>(
@@ -85,8 +85,8 @@ export default function HeroStructure() {
           gl.localClippingEnabled = true;
         }}
       >
-        <FitOrtho height={total} />
-        <Stage center={[0, 0]} radius={14} sunHour={15.5} grid={false} background="#09090a" />
+        <FitOrtho height={total} span={Math.hypot(w, d)} />
+        <Stage center={[0, 0]} radius={Math.max(14, Math.hypot(w, d) * 0.6)} sunHour={15.5} grid={false} background="#09090a" />
         <Turntable still={still}>
           <StructureModel spec={HOUSE} mode="static" hero={motion} />
         </Turntable>

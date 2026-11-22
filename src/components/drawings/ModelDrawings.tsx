@@ -18,7 +18,7 @@ const rectOf = (e: StructuralElement): Rect => {
 
 function slabKind(e: StructuralElement) {
   if (e.kind === 'beam' && e.section.kind === 'rc-beam' && e.label.startsWith('Hidden')) return 'hidden';
-  if (e.section.kind === 'ribbed-slab') return e.section.ribAxis === 'x' ? 'rib-x' : 'rib-z';
+  if (e.section.kind === 'ribbed-slab') return e.section.ribAxis === 'both' ? 'waffle' : e.section.ribAxis === 'x' ? 'rib-x' : 'rib-z';
   if (e.section.kind === 'rc-slab') return 'solid';
   return null;
 }
@@ -61,6 +61,7 @@ function Plan({ spec, level }: { spec: BuildingSpec; level: number }) {
   const fnd = level < 0;
   const slabs = els.filter((e) => e.level === level && (e.kind === 'slab' || slabKind(e) === 'hidden'));
   const beams = els.filter((e) => e.level === level && e.kind === 'beam' && slabKind(e) !== 'hidden');
+  const walls = els.filter((e) => e.level === level && (e.kind === 'wall' || e.kind === 'stair' || e.kind === 'ramp'));
   const cols = els.filter((e) => e.kind === 'column' && e.level === (fnd ? 0 : level));
   const footings = fnd ? els.filter((e) => e.kind === 'footing') : [];
 
@@ -80,10 +81,10 @@ function Plan({ spec, level }: { spec: BuildingSpec; level: number }) {
       {slabs.map((e) => {
         const r = rectOf(e);
         const k = slabKind(e);
-        const fill = k === 'solid' ? `url(#${uid}s)` : k === 'rib-x' ? `url(#${uid}x)` : k === 'rib-z' ? `url(#${uid}z)` : 'none';
+        const fill = k === 'solid' ? `url(#${uid}s)` : k === 'rib-x' || k === 'waffle' ? `url(#${uid}x)` : k === 'rib-z' ? `url(#${uid}z)` : 'none';
         return (
           <rect key={e.id} x={Math.min(r.x0, r.x1)} y={Math.min(r.z0, r.z1)} width={Math.abs(r.x1 - r.x0)} height={Math.abs(r.z1 - r.z0)} fill={fill} stroke={k === 'hidden' ? C.sand : C.mute} strokeWidth={u} strokeDasharray={k === 'hidden' ? '0.25 0.15' : undefined}>
-            <title>{`${e.label} · ${e.story} · ${k === 'hidden' ? 'hidden beam' : k === 'solid' ? 'solid slab' : 'hollow-block slab'}`}</title>
+            <title>{`${e.label} · ${e.story} · ${k === 'hidden' ? 'hidden beam' : k === 'solid' ? (e.section.kind === 'rc-slab' && e.section.drop ? 'flat slab with drop panels' : 'solid slab') : k === 'waffle' ? 'waffle slab' : 'hollow-block slab'}`}</title>
           </rect>
         );
       })}
@@ -101,6 +102,17 @@ function Plan({ spec, level }: { spec: BuildingSpec; level: number }) {
         return (
           <rect key={e.id} x={r.x0} y={r.z0} width={r.x1 - r.x0} height={r.z1 - r.z0} fill="#0f0f10" stroke={C.line} strokeWidth={u}>
             <title>{`${e.label} · ${e.story ?? ''} · ${e.section.kind === 'rc-beam' ? `${e.section.b}×${e.section.h}` : ''}`}</title>
+          </rect>
+        );
+      })}
+      {walls.map((e) => {
+        const r = rectOf(e);
+        const wall = e.kind === 'wall';
+        const title = <title>{`${e.label} · ${e.story ?? ''} · ${e.kind}`}</title>;
+        if (e.rotation) return <line key={e.id} x1={r.x0} y1={r.z0} x2={r.x1} y2={r.z1} stroke={wall ? C.dim : C.mute} strokeWidth={e.size[2]} strokeOpacity={wall ? 0.9 : 0.3}>{title}</line>;
+        return (
+          <rect key={e.id} x={r.x0} y={r.z0} width={r.x1 - r.x0} height={r.z1 - r.z0} fill={wall ? C.dim : 'none'} stroke={C.line} strokeWidth={u} strokeDasharray={wall ? undefined : '0.25 0.15'}>
+            {title}
           </rect>
         );
       })}

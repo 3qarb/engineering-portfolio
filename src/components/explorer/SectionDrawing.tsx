@@ -1,146 +1,13 @@
-import type { ReactNode } from 'react';
 import type { Section } from '../../lib/structure/types';
 import { perimeterBars } from '../../lib/structure/rebar';
-
-/* Drawing colours, kept in sync with the theme tokens */
-const C = {
-  line: '#ece7df',
-  mute: '#8a857d',
-  steel: '#c9a46c',
-  concrete: '#1d1c1b',
-  hatch: '#3a3835',
-  stone: '#2b2620',
-  timber: '#3a2a1b',
-};
-
-interface Ctx {
-  /** reference size (mm) used to scale strokes and text */
-  u: number;
-}
-
-const sw = (ctx: Ctx, k = 1) => (ctx.u / 420) * k;
-const fs = (ctx: Ctx) => ctx.u * 0.05;
-
-function Dim({
-  ctx,
-  x1,
-  y1,
-  x2,
-  y2,
-  off,
-  text,
-  vertical = false,
-}: {
-  ctx: Ctx;
-  x1: number;
-  y1: number;
-  x2: number;
-  y2: number;
-  off: number;
-  text: string;
-  vertical?: boolean;
-}) {
-  const tick = ctx.u * 0.022;
-  const s = sw(ctx);
-  if (vertical) {
-    const x = x1 + off;
-    return (
-      <g stroke={C.mute} strokeWidth={s} fill="none">
-        <line x1={x1} y1={y1} x2={x + tick} y2={y1} strokeDasharray={`${s * 4} ${s * 3}`} />
-        <line x1={x2} y1={y2} x2={x + tick} y2={y2} strokeDasharray={`${s * 4} ${s * 3}`} />
-        <line x1={x} y1={y1} x2={x} y2={y2} />
-        <line x1={x - tick} y1={y1 + tick} x2={x + tick} y2={y1 - tick} />
-        <line x1={x - tick} y1={y2 + tick} x2={x + tick} y2={y2 - tick} />
-        <text
-          x={x + tick * 2.2}
-          y={(y1 + y2) / 2}
-          fill={C.line}
-          stroke="none"
-          fontSize={fs(ctx)}
-          fontFamily="JetBrains Mono, monospace"
-          dominantBaseline="middle"
-        >
-          {text}
-        </text>
-      </g>
-    );
-  }
-  const y = y1 + off;
-  return (
-    <g stroke={C.mute} strokeWidth={s} fill="none">
-      <line x1={x1} y1={y1} x2={x1} y2={y + tick} strokeDasharray={`${s * 4} ${s * 3}`} />
-      <line x1={x2} y1={y2} x2={x2} y2={y + tick} strokeDasharray={`${s * 4} ${s * 3}`} />
-      <line x1={x1} y1={y} x2={x2} y2={y} />
-      <line x1={x1 - tick} y1={y + tick} x2={x1 + tick} y2={y - tick} />
-      <line x1={x2 - tick} y1={y + tick} x2={x2 + tick} y2={y - tick} />
-      <text
-        x={(x1 + x2) / 2}
-        y={y + tick * 3.4}
-        fill={C.line}
-        stroke="none"
-        fontSize={fs(ctx)}
-        fontFamily="JetBrains Mono, monospace"
-        textAnchor="middle"
-      >
-        {text}
-      </text>
-    </g>
-  );
-}
-
-function Callout({ ctx, x, y, tx, ty, text }: { ctx: Ctx; x: number; y: number; tx: number; ty: number; text: string }) {
-  const s = sw(ctx);
-  const right = tx > x;
-  return (
-    <g>
-      <circle cx={x} cy={y} r={s * 3} fill={C.steel} />
-      <polyline points={`${x},${y} ${tx},${ty} ${tx + (right ? 1 : -1) * ctx.u * 0.06},${ty}`} stroke={C.steel} strokeWidth={s} fill="none" />
-      <text
-        x={tx + (right ? 1 : -1) * ctx.u * 0.08}
-        y={ty}
-        fill={C.steel}
-        fontSize={fs(ctx)}
-        fontFamily="JetBrains Mono, monospace"
-        textAnchor={right ? 'start' : 'end'}
-        dominantBaseline="middle"
-      >
-        {text}
-      </text>
-    </g>
-  );
-}
-
-function Hatch({ id, ctx }: { id: string; ctx: Ctx }) {
-  const p = ctx.u / 18;
-  return (
-    <defs>
-      <pattern id={id} width={p} height={p} patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-        <rect width={p} height={p} fill={C.concrete} />
-        <line x1="0" y1="0" x2="0" y2={p} stroke={C.hatch} strokeWidth={sw(ctx, 1.2)} />
-      </pattern>
-    </defs>
-  );
-}
-
-function frame(w: number, h: number, children: (ctx: Ctx) => ReactNode, pad = 0.55) {
-  const u = Math.max(w, h);
-  const ctx = { u };
-  const m = u * pad;
-  return (
-    <svg
-      viewBox={`${-m} ${-m * 0.7} ${w + m * 2} ${h + m * 1.6}`}
-      className="h-full w-full"
-      role="img"
-      aria-label="Cross-section drawing"
-    >
-      {children(ctx)}
-    </svg>
-  );
-}
+import { Callout, Dim, Hatch } from './drawing';
+import { C, frame, fs, sw } from './drawingKit';
+import { CircleColumn, DropSlab, RampSection, StairSection, WallSection } from './SectionDrawingRc';
 
 export function SectionDrawing({ section }: { section: Section }) {
   switch (section.kind) {
     case 'rc-column': {
+      if (section.shape === 'circle') return <CircleColumn s={section} />;
       const { b, h, cover, bars, ties } = section;
       return frame(b, h, (ctx) => {
         const ti = cover + ties.dia / 2;
@@ -232,6 +99,7 @@ export function SectionDrawing({ section }: { section: Section }) {
     }
 
     case 'rc-slab': {
+      if (section.drop) return <DropSlab s={section} />;
       const W = 1000;
       const { t, cover, bottom, top } = section;
       return frame(W, t, (ctx) => {
@@ -302,7 +170,7 @@ export function SectionDrawing({ section }: { section: Section }) {
             <Callout ctx={ctx} x={ribs[0]} y={yb} tx={-ctx.u * 0.06} ty={depth + ctx.u * 0.12} text={`${ribBars.bottom.n} T${ribBars.bottom.dia} B · rib ${ribWidth}`} />
             <Callout ctx={ctx} x={ribs[1]} y={yt} tx={ribs[1]} ty={-ctx.u * 0.06} text={`${ribBars.top.n} T${ribBars.top.dia} T · T${ribLinks.dia}@${ribLinks.spacing}`} />
             <text x={ribWidth + ribSpacing / 2 - ribWidth / 2} y={(topping + depth) / 2} fill={C.mute} fontSize={fs(ctx) * 0.8} fontFamily="JetBrains Mono, monospace" textAnchor="middle" dominantBaseline="middle">
-              block
+              {section.filler === 'void' || section.ribAxis === 'both' ? 'void' : 'block'}
             </text>
           </>
         );
@@ -310,7 +178,7 @@ export function SectionDrawing({ section }: { section: Section }) {
     }
 
     case 'rc-footing': {
-      const { l, t, cover, bottom } = section;
+      const { l, t, cover, bottom, top } = section;
       return frame(l, t, (ctx) => {
         const n = Math.floor(l / bottom.spacing);
         const y = t - cover - bottom.dia / 2;
@@ -324,6 +192,15 @@ export function SectionDrawing({ section }: { section: Section }) {
             {Array.from({ length: n }, (_, i) => (
               <circle key={i} cx={(l - (n - 1) * bottom.spacing) / 2 + i * bottom.spacing} cy={y} r={bottom.dia / 2} fill={C.steel} />
             ))}
+            {top && (
+              <>
+                <line x1={cover} x2={l - cover} y1={cover + top.dia * 1.5} y2={cover + top.dia * 1.5} stroke={C.steel} strokeWidth={top.dia * 0.8} />
+                {Array.from({ length: Math.floor(l / top.spacing) }, (_, i) => (
+                  <circle key={`t${i}`} cx={(l - (Math.floor(l / top.spacing) - 1) * top.spacing) / 2 + i * top.spacing} cy={cover + top.dia / 2} r={top.dia / 2} fill={C.steel} />
+                ))}
+                <Callout ctx={ctx} x={l - cover} y={cover + top.dia / 2} tx={l + ctx.u * 0.05} ty={-ctx.u * 0.05} text={`T${top.dia}@${top.spacing} T`} />
+              </>
+            )}
             <Dim ctx={ctx} x1={0} y1={t} x2={l} y2={t} off={ctx.u * 0.08} text={`${l}`} />
             <Dim ctx={ctx} x1={l} y1={0} x2={l} y2={t} off={ctx.u * 0.05} text={`${t}`} vertical />
             <Callout ctx={ctx} x={(l - (n - 1) * bottom.spacing) / 2} y={y} tx={-ctx.u * 0.05} ty={t + ctx.u * 0.05} text={`T${bottom.dia}@${bottom.spacing} EW`} />
@@ -331,6 +208,13 @@ export function SectionDrawing({ section }: { section: Section }) {
         );
       }, 0.25);
     }
+
+    case 'rc-wall':
+      return <WallSection s={section} />;
+    case 'stair':
+      return <StairSection s={section} />;
+    case 'ramp':
+      return <RampSection s={section} />;
 
     case 'masonry-wall': {
       const H = 1200;

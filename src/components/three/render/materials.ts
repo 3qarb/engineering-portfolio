@@ -112,3 +112,24 @@ export const edgeGhostMaterial = new THREE.LineBasicMaterial({ color: '#ece7df',
 export const selectEdge = new THREE.LineBasicMaterial({ color: '#f3bf62' });
 
 export const glassEdge = new THREE.LineBasicMaterial({ color: '#f0d29a', transparent: true, opacity: 0.9 });
+
+/** Hollow blocks left in a ribbed slab: pale concrete block, a little see-through in close-ups. */
+export const blockMaterial = new THREE.MeshStandardMaterial({
+  color: '#a99c8a',
+  roughness: 0.95,
+  transparent: true,
+  opacity: 0.62,
+  clippingPlanes: planes,
+});
+
+/** Removable void formers of a waffle slab: dark plastic. */
+export const voidMaterial = new THREE.MeshStandardMaterial({
+  color: '#3b4147',
+  roughness: 0.55,
+  transparent: true,
+  opacity: 0.55,
+  clippingPlanes: planes,
+});
+
+/** Faint outline for see-through concrete in a close-up, so the bars read first. */
+export const detailEdge = new THREE.LineBasicMaterial({ color: '#f0d29a', transparent: true, opacity: 0.28 });

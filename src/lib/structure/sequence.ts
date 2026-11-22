@@ -26,9 +26,9 @@ const vertical = (e: StructuralElement) => e.size[1] >= e.size[0] && e.size[1] >
 
 const PHASES: Record<BuildingSpec['system'], Phase[]> = {
   'rc-frame': [
-    { key: 'col', label: 'columns', days: 4, match: (e) => e.kind === 'column' },
+    { key: 'col', label: 'columns & walls', days: 4, match: (e) => e.kind === 'column' || e.kind === 'wall' },
     { key: 'beam', label: 'beams', days: 5, match: (e) => e.kind === 'beam' },
-    { key: 'slab', label: 'slab', days: 6, match: (e) => e.kind === 'slab' },
+    { key: 'slab', label: 'slab', days: 6, match: (e) => e.kind === 'slab' || e.kind === 'stair' || e.kind === 'ramp' },
   ],
   'heritage-masonry': [
     { key: 'wall', label: 'stone walls', days: 9, match: (e) => e.kind === 'wall' },

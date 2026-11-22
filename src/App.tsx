@@ -11,6 +11,8 @@ import { NotFound } from './pages/NotFound';
 const ExplorerPage = lazy(() => import('./pages/ExplorerPage').then((m) => ({ default: m.ExplorerPage })));
 const RenderPage = lazy(() => import('./pages/RenderPage').then((m) => ({ default: m.RenderPage })));
 const ProjectEditor = lazy(() => import('./pages/ProjectEditor').then((m) => ({ default: m.ProjectEditor })));
+const Elements = lazy(() => import('./pages/Elements').then((m) => ({ default: m.Elements })));
+const ImportProject = lazy(() => import('./pages/ImportProject').then((m) => ({ default: m.ImportProject })));
 const CvPage = lazy(() => import('./pages/CvPage').then((m) => ({ default: m.CvPage })));
 
 /** The same pages in both languages: English at "/", Arabic under "/ar". */
@@ -20,9 +22,11 @@ function pages(prefix: '' | '/ar') {
       <Route index element={<Index />} />
       <Route path="projects" element={<Projects />} />
       <Route path="projects/new" element={<ProjectEditor />} />
+        <Route path="projects/import" element={<ImportProject />} />
       <Route path="projects/:slug" element={<ProjectDetail />} />
       <Route path="projects/:slug/edit" element={<ProjectEditor />} />
       <Route path="explorer" element={<ExplorerPage />} />
+        <Route path="elements" element={<Elements />} />
       <Route path="about" element={<About />} />
       <Route path="cv" element={<CvPage />} />
       <Route path="contact" element={<Contact />} />

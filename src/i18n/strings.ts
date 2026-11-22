@@ -22,7 +22,7 @@ export const en = {
     openExplorer: 'Open the 3D explorer',
     loading: 'Loading…',
   },
-  nav: { work: 'Work', explorer: '3D Explorer', about: 'About', cv: 'CV', contact: 'Contact' },
+  nav: { work: 'Work', explorer: '3D Explorer', elements: 'Elements', about: 'About', cv: 'CV', contact: 'Contact' },
   footer: {
     next: 'Next step',
     ctaA: 'Discuss a project',
@@ -192,7 +192,7 @@ export const en = {
       description:
         'Civil engineer in Jeddah: technical office and structural engineering on the Jeddah Historic District restoration in Al-Balad, a programme of more than 300 historic buildings. Projects, CV and an interactive 3D structural explorer.',
     },
-    projects: { title: 'Projects — Abdulaziz Kanaan', description: 'Restoration, strengthening, temporary works and reinforced concrete: projects and technical studies by civil engineer Abdulaziz Kanaan.' },
+    projects: { title: 'Projects — Abdulaziz Kanaan', description: 'Structural analysis and design projects by civil engineer Abdulaziz Kanaan, each structure open in 3D with its members, reinforcement and quantities.' },
     explorer: { title: '3D Structural Explorer — Abdulaziz Kanaan', description: 'Open the structures in 3D: members, reinforcement, cross-sections, quantity schedules and the construction sequence.' },
     about: { title: 'About — Abdulaziz Kanaan', description: 'Technical Office Engineer at IKK Group – Essam Kabbani & Partners on the Jeddah Historic District restoration since 2025.' },
     contact: { title: 'Contact — Abdulaziz Kanaan', description: 'Get in touch about technical office, structural engineering or restoration work in Jeddah.' },

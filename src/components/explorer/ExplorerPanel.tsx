@@ -145,7 +145,7 @@ function BuildingDetail({ spec, project, locked }: { spec: BuildingSpec; project
         {spec.imported ? (
           <>
             <Row label="Levels" value={spec.imported.levels.map((l) => l.name).join(' · ')} />
-            <Row label="Members" value={`${elements.filter((e) => e.kind === 'column').length} col · ${elements.filter((e) => e.kind === 'beam').length} beam · ${elements.filter((e) => e.kind === 'slab').length} slab`} />
+            <Row label="Members" value={`${elements.filter((e) => e.kind === 'column').length} col · ${elements.filter((e) => e.kind === 'beam').length} beam · ${elements.filter((e) => e.kind === 'slab').length} slab${[['wall', 'wall'], ['stair', 'stair'], ['ramp', 'ramp']].map(([k, n]) => { const c = elements.filter((e) => e.kind === k).length; return c ? ` · ${c} ${n}` : ''; }).join('')}`} />
             <Row label="Source" value={spec.imported.source} />
           </>
         ) : (
@@ -159,7 +159,9 @@ function BuildingDetail({ spec, project, locked }: { spec: BuildingSpec; project
       </dl>
       {spec.basis === 'project' && (
         <p className="-mt-4 border-l-2 border-sand/60 pl-3 text-[13px] leading-snug text-bone-mute">
-          Members and sizes from the issued analysis model; reinforcement from the structural drawings. Architecture by others.
+          {project?.userCreated
+            ? 'Members and sizes from the analysis model file. Reinforcement from the model where given, otherwise the ACI 318-19 minimum.'
+            : 'Members and sizes from the issued analysis model; reinforcement from the structural drawings. Architecture by others.'}
         </p>
       )}
       {spec.basis !== 'project' && (

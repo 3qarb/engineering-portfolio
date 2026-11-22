@@ -29,7 +29,7 @@ export function Hero() {
             <HeroStructure />
           </Suspense>
         ) : (
-          <img src="/renders/bayt-al-balad.jpg" alt="" className="h-full w-full object-cover opacity-80" />
+          <img src="/renders/villa.jpg" alt="" className="h-full w-full object-cover opacity-80" />
         )}
       </div>
       <div

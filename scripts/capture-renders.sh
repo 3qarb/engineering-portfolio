@@ -7,7 +7,7 @@ set -euo pipefail
 
 BASE="${1:-http://localhost:3000}"
 OUT="$(cd "$(dirname "$0")/.." && pwd)/public/renders"
-IDS=(${IDS_OVERRIDE:-bayt-al-balad rc-office-block strengthened-block facade-retention})
+IDS=(${IDS_OVERRIDE:-villa})
 mkdir -p "$OUT"
 
 playwright-cli -s=renders open "about:blank" >/dev/null

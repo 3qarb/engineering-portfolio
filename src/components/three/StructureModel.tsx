@@ -20,6 +20,7 @@ import {
   type MatKey,
 } from './render/materials';
 import { RebarCage } from './RebarCage';
+import { MemberDetail } from './MemberDetail';
 import { Annotations } from './Annotations';
 
 export const EXPLODE_GAP = 2.4;
@@ -30,6 +31,8 @@ const HOVER = new THREE.Color('#ffe3b5');
 const SELECT = new THREE.Color('#f3bf62');
 const BUILDING = new THREE.Color('#ffcf85');
 const noRaycast = () => null;
+/** Close-ups leave out the blocks on one half so the rib bars show */
+const cutAway = (x: number, z: number) => x + z > 0;
 const reducedMotion = () =>
   typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const isVertical = (e: StructuralElement) => !e.rotation && e.size[1] >= e.size[0] && e.size[1] >= e.size[2];
@@ -298,7 +301,12 @@ export function StructureModel({
         raycast={noRaycast}
       />
 
-      {selected && (
+      {selected && (selected.section.kind === 'ribbed-slab' || (selected.section.kind === 'rc-slab' && selected.section.drop)) && (
+        <group ref={overlay}>
+          <MemberDetail el={selected} rebar={showRebar} selected keepFiller={cutAway} />
+        </group>
+      )}
+      {selected && !(selected.section.kind === 'ribbed-slab' || (selected.section.kind === 'rc-slab' && selected.section.drop)) && (
         <group ref={overlay}>
           <mesh
             geometry={memberGeometry(selected)}

@@ -266,6 +266,8 @@ export function ProjectEditor() {
       featured: false,
       userCreated: true,
       building: m.enabled ? toSpec(m, newSlug, short) : undefined,
+      // a project added from its analysis model keeps that model when its text is edited
+      model: existing?.model,
       render: m.enabled ? snapshot(canvasRef.current) : undefined,
       createdAt: existing?.createdAt ?? new Date().toISOString(),
     };

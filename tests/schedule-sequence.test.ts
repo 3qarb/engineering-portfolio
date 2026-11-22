@@ -4,8 +4,9 @@ import { elementsFor } from '../src/lib/structure/generate';
 import { buildSchedule, scheduleCsv } from '../src/lib/structure/schedule';
 import { activeTask, planSequence } from '../src/lib/structure/sequence';
 import { cageFor, perimeterBars } from '../src/lib/structure/rebar';
+import { office, scaffold } from './fixtures';
 
-describe.each(buildings.map((b) => [b.id, b] as const))('%s', (_id, spec) => {
+describe.each([...buildings, office, scaffold].map((b) => [b.id, b] as const))('%s', (_id, spec) => {
   const elements = elementsFor(spec);
 
   it('generates members with unique ids', () => {
@@ -37,7 +38,7 @@ describe.each(buildings.map((b) => [b.id, b] as const))('%s', (_id, spec) => {
 
 describe('rc sequence order', () => {
   it('columns of a storey finish before its beams start', () => {
-    const spec = buildings.find((b) => b.id === 'rc-office-block')!;
+    const spec = office;
     const elements = elementsFor(spec);
     const plan = planSequence(spec, elements);
     const lvl = 2;
@@ -56,7 +57,7 @@ describe('rebar cages', () => {
     expect(new Set(pts.map((p) => p.join(','))).size).toBe(16);
   });
   it('builds a 16-bar cage with ties for the 500×700 column', () => {
-    const spec = buildings.find((b) => b.id === 'rc-office-block')!;
+    const spec = office;
     const col = elementsFor(spec).find((e) => e.kind === 'column' && e.level === 0)!;
     const cage = cageFor(col)!;
     // cage dimensions are in metres

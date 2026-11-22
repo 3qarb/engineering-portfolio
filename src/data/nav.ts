@@ -2,6 +2,7 @@
 export const NAV = [
   { to: '/projects', key: 'work' },
   { to: '/explorer', key: 'explorer' },
+  { to: '/elements', key: 'elements' },
   { to: '/about', key: 'about' },
   { to: '/cv', key: 'cv' },
   { to: '/contact', key: 'contact' },

@@ -1,0 +1,78 @@
+// Typical buildings for testing the generators (the site itself shows only the owner's projects).
+import type { BuildingSpec } from '../src/lib/structure/types';
+
+export const office: BuildingSpec = {
+    id: 'rc-office-block',
+    projectSlug: 'test',
+    name: 'RC office block',
+    system: 'rc-frame',
+    floors: 8,
+    storeyHeight: 3.4,
+    baysX: [6, 6, 6, 6],
+    baysZ: [5.5, 5.5, 5.5],
+    site: { x: 8, z: -8 },
+    rc: {
+      columnLower: {
+        kind: 'rc-column',
+        b: 500,
+        h: 700,
+        cover: 40,
+        bars: { n: 16, dia: 25 },
+        ties: { dia: 10, spacing: 150 },
+        concrete: 'C40/50',
+        steel: 'B500B',
+      },
+      column: {
+        kind: 'rc-column',
+        b: 400,
+        h: 600,
+        cover: 40,
+        bars: { n: 12, dia: 20 },
+        ties: { dia: 10, spacing: 200 },
+        concrete: 'C40/50',
+        steel: 'B500B',
+      },
+      beam: {
+        kind: 'rc-beam',
+        b: 300,
+        h: 650,
+        cover: 30,
+        top: { n: 4, dia: 20 },
+        bottom: { n: 4, dia: 22 },
+        stirrups: { dia: 10, spacing: 150, legs: 2 },
+        concrete: 'C40/50',
+        steel: 'B500B',
+      },
+      slab: {
+        kind: 'rc-slab',
+        t: 220,
+        cover: 25,
+        bottom: { dia: 12, spacing: 200 },
+        top: { dia: 10, spacing: 200 },
+        concrete: 'C35/45',
+        steel: 'B500B',
+      },
+      footing: {
+        kind: 'rc-footing',
+        b: 2600,
+        l: 2600,
+        t: 800,
+        cover: 75,
+        bottom: { dia: 16, spacing: 150 },
+        concrete: 'C35/45',
+        steel: 'B500B',
+      },
+    },
+};
+
+export const scaffold: BuildingSpec = {
+    id: 'facade-retention',
+    projectSlug: 'test',
+    name: 'Façade retention scaffold',
+    system: 'scaffold',
+    floors: 5,
+    storeyHeight: 2,
+    baysX: [2.5, 2.5, 2.5, 2.5],
+    baysZ: [1.2],
+    site: { x: -16, z: 20 },
+};

@@ -1,11 +1,15 @@
-import { useEffect, useRef } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { X } from 'lucide-react';
+import { Box, Layers, X } from 'lucide-react';
 import { elementLevel } from '../../lib/structure/generate';
 import { sectionFacts } from '../../lib/structure/sectionMath';
 import { KIND_LABEL, type StructuralElement } from '../../lib/structure/types';
 import { useExplorer } from '../../store/explorerStore';
 import { SectionDrawing } from './SectionDrawing';
+import { hasWebGL } from '../../lib/device';
+
+const ElementViewer = lazy(() => import('../elements/ElementViewer'));
+const CAGED = new Set(['rc-column', 'rc-beam', 'rc-slab', 'ribbed-slab', 'rc-footing', 'rc-wall', 'stair', 'ramp']);
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
@@ -13,7 +17,10 @@ const SECTION_NAME: Record<StructuralElement['section']['kind'], string> = {
   'rc-column': 'Column section',
   'rc-beam': 'Beam section',
   'rc-slab': 'Slab section, 1 m strip',
-  'ribbed-slab': 'Hollow-block slab section',
+  'ribbed-slab': 'Ribbed slab section',
+  'rc-wall': 'Wall section, 1 m length',
+  stair: 'Stair flight section',
+  ramp: 'Ramp section, 1 m strip',
   'rc-footing': 'Footing section',
   'masonry-wall': 'Wall section',
   'timber-beam': 'Timber section',
@@ -26,6 +33,10 @@ export function SectionModal({ el, project = false }: { el?: StructuralElement; 
   const openSection = useExplorer((s) => s.openSection);
   const closeRef = useRef<HTMLButtonElement>(null);
   const show = open && !!el;
+  const [view, setView] = useState<'section' | '3d'>('section');
+  const [webgl] = useState(() => hasWebGL());
+  const can3d = !!el && webgl && CAGED.has(el.section.kind);
+  const mode = can3d ? view : 'section';
 
   useEffect(() => {
     if (!show) return;
@@ -61,16 +72,33 @@ export function SectionModal({ el, project = false }: { el?: StructuralElement; 
             exit={{ y: 20, opacity: 0, transition: { duration: 0.2 } }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="grid-paper relative min-h-[320px] border-b border-white/10 p-6 sm:p-10 lg:border-b-0 lg:border-r">
-              <motion.div
-                className="h-full min-h-[300px] w-full"
-                initial={{ opacity: 0, scale: 0.94 }}
-                animate={{ opacity: 1, scale: 1, transition: { duration: 0.7, delay: 0.1, ease } }}
-              >
-                <SectionDrawing section={el.section} />
-              </motion.div>
-              <p className="label absolute bottom-5 left-6 right-6">
-                Dimensions in mm · not to scale · {project ? 'from the issued model and drawings' : 'typical values, not a project design'}
+            <div className={`relative min-h-[320px] border-b border-white/10 lg:border-b-0 lg:border-r ${mode === '3d' ? 'bg-[#0c0c0d]' : 'grid-paper p-6 pt-16 sm:p-10 sm:pt-16'}`}>
+              {can3d && (
+                <div className="absolute left-4 top-4 z-10 flex gap-1 rounded-sm border border-white/10 bg-ink-900/90 p-1" role="tablist" aria-label="Drawing">
+                  {(['section', '3d'] as const).map((v) => (
+                    <button key={v} type="button" role="tab" aria-selected={mode === v} onClick={() => setView(v)} className={`label inline-flex min-h-[36px] items-center gap-1.5 rounded-sm px-3 ${mode === v ? 'bg-bone text-ink-950' : 'text-bone-dim hover:text-bone'}`}>
+                      {v === '3d' ? <Box className="h-3.5 w-3.5" /> : <Layers className="h-3.5 w-3.5" />} {v === '3d' ? '3D detail' : 'Section'}
+                    </button>
+                  ))}
+                </div>
+              )}
+              {mode === '3d' ? (
+                <div className="h-[360px] w-full sm:h-[440px] lg:h-full">
+                  <Suspense fallback={<span className="label grid h-full animate-pulse place-items-center">…</span>}>
+                    <ElementViewer key={el.id} el={el} rebar />
+                  </Suspense>
+                </div>
+              ) : (
+                <motion.div
+                  className="h-full min-h-[300px] w-full"
+                  initial={{ opacity: 0, scale: 0.94 }}
+                  animate={{ opacity: 1, scale: 1, transition: { duration: 0.7, delay: 0.1, ease } }}
+                >
+                  <SectionDrawing section={el.section} />
+                </motion.div>
+              )}
+              <p className="label pointer-events-none absolute bottom-5 left-6 right-6">
+                {mode === '3d' ? 'Drag to turn · scroll to zoom' : 'Dimensions in mm · not to scale'} · {project ? 'from the issued model and drawings' : 'typical values, not a project design'}
               </p>
             </div>
             <div className="flex flex-col gap-6 p-6 sm:p-10">
